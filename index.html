@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>كاشير أوروك</title>
+<meta name="application-name" content="كاشير أوروك">
+<meta name="apple-mobile-web-app-title" content="كاشير أوروك">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0a0f1c">
+<meta name="msapplication-navbutton-color" content="#0a0f1c">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23f59e0b'/><text x='50' y='65' text-anchor='middle' font-size='55'>📚</text></svg>">
+<script>
+// PWA Manifest (inline)
+const manifest = {
+  name: "كاشير أوروك",
+  short_name: "كاشير أوروك",
+  description: "نظام إدارة المكتبة ونقطة البيع",
+  start_url: ".",
+  display: "standalone",
+  background_color: "#0a0f1c",
+  theme_color: "#0a0f1c",
+  orientation: "any",
+  icons: [{
+    src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='80' fill='%23f59e0b'/><text x='256' y='340' text-anchor='middle' font-size='280'>📚</text></svg>",
+    sizes: "512x512",
+    type: "image/svg+xml",
+    purpose: "any maskable"
+  }]
+};
+const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+const manifestURL = URL.createObjectURL(blob);
+const link = document.createElement('link');
+link.rel = 'manifest';
+link.href = manifestURL;
+document.head.appendChild(link);
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Readex+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg-primary:#0a0f1c;--bg-secondary:#111827;--bg-card:#1a2235;--bg-card-hover:#1f2a42;--bg-input:#0d1424;--accent:#f59e0b;--accent-glow:rgba(245,158,11,0.15);--accent-hover:#fbbf24;--text-primary:#f1f5f9;--text-secondary:#94a3b8;--text-muted:#64748b;--border:#1e293b;--border-light:#2a3a52;--success:#10b981;--success-bg:rgba(16,185,129,0.1);--danger:#ef4444;--danger-bg:rgba(239,68,68,0.1);--info:#3b82f6;--info-bg:rgba(59,130,246,0.1);--purple:#a78bfa;--purple-bg:rgba(167,139,250,0.1);--shadow:0 4px 24px rgba(0,0,0,0.3);--radius:12px;--radius-sm:8px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Tajawal',sans-serif;background:var(--bg-primary);color:var(--text-primary);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse at 20% 0%,rgba(245,158,11,0.06) 0%,transparent 50%),radial-gradient(ellipse at 80% 100%,rgba(59,130,246,0.04) 0%,transparent 50%);pointer-events:none;z-index:0}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg-primary)}::-webkit-scrollbar-thumb{background:var(--border-light);border-radius:3px}
+
+.header{background:var(--bg-secondary);border-bottom:1px solid var(--border);padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
+.logo{display:flex;align-items:center;gap:12px}
+.logo-icon{width:40px;height:40px;background:linear-gradient(135deg,var(--accent),#d97706);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 2px 12px rgba(245,158,11,0.3)}
+.logo-text{font-family:'Readex Pro',sans-serif;font-size:1.3rem;font-weight:700;background:linear-gradient(135deg,var(--accent),#fcd34d);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header-stats{display:flex;gap:1.5rem;align-items:center}
+.header-stat{text-align:center}
+.header-stat-value{font-family:'Readex Pro',sans-serif;font-size:1.1rem;font-weight:700;color:var(--accent)}
+.header-stat-label{font-size:0.7rem;color:var(--text-muted)}
+
+.nav{background:var(--bg-secondary);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;gap:0;position:sticky;top:64px;z-index:99;overflow-x:auto}
+.nav-btn{background:none;border:none;color:var(--text-muted);font-family:'Tajawal',sans-serif;font-size:0.95rem;font-weight:500;padding:14px 20px;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;display:flex;align-items:center;gap:8px;white-space:nowrap}
+.nav-btn:hover{color:var(--text-secondary)}.nav-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+.main{max-width:1400px;margin:0 auto;padding:1.5rem 2rem;position:relative;z-index:1}
+.page{display:none;animation:fadeIn 0.3s ease}.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:1.5rem}
+.stat-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.2rem;transition:all 0.3s}
+.stat-card:hover{border-color:var(--border-light);transform:translateY(-2px);box-shadow:var(--shadow)}
+.stat-card-icon{font-size:1.5rem;margin-bottom:0.5rem}
+.stat-card-value{font-family:'Readex Pro',sans-serif;font-size:1.8rem;font-weight:800;line-height:1}
+.stat-card-label{font-size:0.85rem;color:var(--text-muted);margin-top:4px}
+.stat-card.profit .stat-card-value{color:var(--success)}.stat-card.sales .stat-card-value{color:var(--info)}.stat-card.stock .stat-card-value{color:var(--accent)}
+
+.toolbar{display:flex;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;align-items:center}
+.search-box{flex:1;min-width:250px;position:relative}
+.search-box input{width:100%;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px 12px 44px;color:var(--text-primary);font-family:'Tajawal',sans-serif;font-size:0.95rem;outline:none;transition:all 0.2s}
+.search-box input::placeholder{color:var(--text-muted)}.search-box input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+.search-box .search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-muted)}
+
+.btn{font-family:'Tajawal',sans-serif;font-size:0.9rem;font-weight:600;padding:10px 20px;border-radius:var(--radius-sm);border:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all 0.2s;white-space:nowrap}
+.btn-primary{background:linear-gradient(135deg,var(--accent),#d97706);color:#000;box-shadow:0 2px 8px rgba(245,158,11,0.25)}
+.btn-primary:hover{background:linear-gradient(135deg,var(--accent-hover),var(--accent));transform:translateY(-1px)}
+.btn-secondary{background:var(--bg-card);color:var(--text-primary);border:1px solid var(--border)}
+.btn-secondary:hover{border-color:var(--border-light);background:var(--bg-card-hover)}
+.btn-danger{background:var(--danger-bg);color:var(--danger);border:1px solid rgba(239,68,68,0.2)}.btn-danger:hover{background:rgba(239,68,68,0.2)}
+.btn-success{background:var(--success-bg);color:var(--success);border:1px solid rgba(16,185,129,0.2)}.btn-success:hover{background:rgba(16,185,129,0.2)}
+.btn-purple{background:var(--purple-bg);color:var(--purple);border:1px solid rgba(167,139,250,0.2)}.btn-purple:hover{background:rgba(167,139,250,0.2)}
+.btn-sm{padding:6px 12px;font-size:0.8rem}.btn-xs{padding:4px 8px;font-size:0.75rem}
+
+.filter-group{display:flex;gap:0.5rem;align-items:center}
+.filter-group select{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;color:var(--text-primary);font-family:'Tajawal',sans-serif;font-size:0.9rem;outline:none;cursor:pointer}
+
+.table-container{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.table-scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:800px}
+thead th{background:var(--bg-input);padding:12px 16px;text-align:right;font-weight:600;font-size:0.85rem;color:var(--text-muted);border-bottom:1px solid var(--border);position:sticky;top:0;white-space:nowrap}
+tbody td{padding:12px 16px;border-bottom:1px solid var(--border);font-size:0.9rem;vertical-align:middle}
+tbody tr{transition:background 0.15s}tbody tr:hover{background:var(--bg-card-hover)}tbody tr:last-child td{border-bottom:none}
+
+.book-title-cell{font-weight:600;max-width:250px}.book-author{color:var(--text-secondary);font-size:0.85rem}
+.price{font-family:'Readex Pro',sans-serif;font-weight:600;white-space:nowrap}
+.price-buy{color:var(--info)}.price-sell{color:var(--accent)}.price-profit{color:var(--success)}.price-loss{color:var(--danger)}
+.stock-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:0.8rem;font-weight:600}
+.stock-ok{background:var(--success-bg);color:var(--success)}.stock-low{background:rgba(245,158,11,0.1);color:var(--accent)}.stock-out{background:var(--danger-bg);color:var(--danger)}
+.category-tag{display:inline-block;padding:3px 10px;border-radius:6px;font-size:0.78rem;font-weight:500;background:rgba(99,102,241,0.1);color:#818cf8;white-space:nowrap}
+.actions-cell{display:flex;gap:4px}
+
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:1000;align-items:center;justify-content:center;padding:1rem}
+.modal-overlay.active{display:flex}
+.modal{background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius);width:100%;max-width:600px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 48px rgba(0,0,0,0.5);animation:modalIn 0.25s ease}
+.modal.wide{max-width:850px}
+@keyframes modalIn{from{opacity:0;transform:scale(0.95) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.modal-header{padding:1.2rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-family:'Readex Pro',sans-serif;font-size:1.1rem;font-weight:700}
+.modal-close{background:none;border:none;color:var(--text-muted);font-size:1.5rem;cursor:pointer;padding:4px;line-height:1}.modal-close:hover{color:var(--text-primary)}
+.modal-body{padding:1.5rem}
+.modal-footer{padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;gap:0.75rem;justify-content:flex-start}
+
+.form-group{margin-bottom:1rem}.form-label{display:block;font-size:0.85rem;font-weight:600;color:var(--text-secondary);margin-bottom:6px}
+.form-input{width:100%;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;color:var(--text-primary);font-family:'Tajawal',sans-serif;font-size:0.95rem;outline:none;transition:border 0.2s}
+.form-input:focus{border-color:var(--accent)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+
+.sale-book-info{background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem;margin-bottom:1rem}
+.sale-book-name{font-weight:700;font-size:1rem;margin-bottom:4px}.sale-book-detail{font-size:0.85rem;color:var(--text-muted)}
+
+/* Cart */
+.cart-items{max-height:200px;overflow-y:auto;margin-bottom:1rem}
+.cart-item{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:6px}
+.cart-item-name{font-weight:600;font-size:0.88rem;flex:1}
+.cart-item-detail{font-size:0.8rem;color:var(--text-muted);margin:0 12px}
+.cart-item-price{font-family:'Readex Pro',sans-serif;font-weight:600;color:var(--accent);white-space:nowrap}
+.cart-item-remove{background:none;border:none;color:var(--danger);cursor:pointer;font-size:1rem;padding:2px 6px}
+.cart-total{display:flex;justify-content:space-between;padding:12px;background:var(--success-bg);border:1px solid rgba(16,185,129,0.2);border-radius:var(--radius-sm);font-weight:700;font-size:1rem}
+.cart-total-value{font-family:'Readex Pro',sans-serif;color:var(--success)}
+
+/* Fields Manager */
+.fields-manager{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);margin-top:1.5rem;overflow:hidden}
+.fields-manager-header{padding:1rem 1.2rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--bg-input)}
+.fields-manager-title{font-weight:700;font-size:0.95rem;display:flex;align-items:center;gap:8px;color:var(--purple)}
+.fields-manager-body{padding:1.2rem}
+.custom-field-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:8px;transition:all 0.2s}
+.custom-field-item:hover{border-color:var(--border-light)}
+.custom-field-item .field-name{flex:1;font-weight:600;font-size:0.9rem}
+.custom-field-item .field-type{font-size:0.75rem;padding:2px 8px;border-radius:4px;background:var(--purple-bg);color:var(--purple);font-weight:500}
+.custom-field-item .field-actions{display:flex;gap:4px}
+.add-field-form{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+.add-field-form .form-group{margin-bottom:0;flex:1;min-width:120px}
+.add-field-form .form-label{font-size:0.75rem;margin-bottom:4px}
+.add-field-form .form-input{padding:8px 10px;font-size:0.85rem}
+
+/* Invoice Print Styles */
+.invoice-preview{background:#fff;color:#1a1a1a;border-radius:var(--radius);overflow:hidden;font-family:'Tajawal',sans-serif}
+.invoice-preview *{color:#1a1a1a}
+.inv-header{display:flex;justify-content:space-between;align-items:flex-start;padding:24px 28px;border-bottom:3px solid #f59e0b}
+.inv-store-info{text-align:right}
+.inv-store-name{font-family:'Readex Pro',sans-serif;font-size:1.5rem;font-weight:800;color:#1a1a1a;margin-bottom:4px}
+.inv-store-detail{font-size:0.85rem;color:#555;line-height:1.6}
+.inv-logo{width:70px;height:70px;border-radius:12px;background:linear-gradient(135deg,#f59e0b,#d97706);display:flex;align-items:center;justify-content:center;font-size:2rem;color:#fff;flex-shrink:0}
+.inv-logo *{color:#fff!important}
+.inv-meta{display:flex;justify-content:space-between;padding:16px 28px;background:#fefce8;border-bottom:1px solid #fef3c7}
+.inv-meta-item{text-align:center}
+.inv-meta-label{font-size:0.75rem;color:#92400e;font-weight:600;text-transform:uppercase;letter-spacing:0.5px}
+.inv-meta-value{font-family:'Readex Pro',sans-serif;font-size:1rem;font-weight:700;color:#1a1a1a;margin-top:2px}
+.inv-body{padding:20px 28px}
+.inv-table{width:100%;border-collapse:collapse;margin-bottom:16px}
+.inv-table th{background:#f8fafc;padding:10px 12px;text-align:right;font-weight:700;font-size:0.82rem;color:#475569;border-bottom:2px solid #e2e8f0;white-space:nowrap}
+.inv-table td{padding:10px 12px;border-bottom:1px solid #f1f5f9;font-size:0.88rem}
+.inv-table tr:last-child td{border-bottom:none}
+.inv-totals{display:flex;justify-content:flex-start;margin-top:12px}
+.inv-totals-box{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px 20px;min-width:220px}
+.inv-totals-row{display:flex;justify-content:space-between;padding:4px 0;font-size:0.9rem}
+.inv-totals-row.grand{border-top:2px solid #e2e8f0;margin-top:6px;padding-top:8px;font-weight:800;font-size:1.05rem;color:#059669}
+.inv-footer{text-align:center;padding:16px 28px;background:#f8fafc;border-top:1px solid #e2e8f0;font-size:0.8rem;color:#94a3b8}
+
+/* Settings */
+.settings-section{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1.5rem}
+.settings-title{font-family:'Readex Pro',sans-serif;font-size:1rem;font-weight:700;margin-bottom:1rem;display:flex;align-items:center;gap:8px;color:var(--accent)}
+
+/* Reports */
+.reports-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(350px,1fr));gap:1.5rem}
+.report-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.report-header{padding:1rem 1.2rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.report-title{font-weight:700;font-size:0.95rem;display:flex;align-items:center;gap:8px}
+.report-body{padding:1.2rem}
+.report-item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)}
+.report-item:last-child{border-bottom:none}
+.report-item-label{color:var(--text-secondary);font-size:0.9rem}
+.report-item-value{font-family:'Readex Pro',sans-serif;font-weight:600}
+
+.pagination{display:flex;align-items:center;justify-content:center;gap:0.5rem;padding:1rem;border-top:1px solid var(--border)}
+.page-btn{background:var(--bg-input);border:1px solid var(--border);border-radius:6px;color:var(--text-secondary);padding:6px 12px;font-family:'Tajawal',sans-serif;font-size:0.85rem;cursor:pointer;transition:all 0.2s}
+.page-btn:hover{border-color:var(--accent);color:var(--accent)}.page-btn.active{background:var(--accent);color:#000;border-color:var(--accent);font-weight:700}.page-btn:disabled{opacity:0.3;cursor:not-allowed}
+.page-info{color:var(--text-muted);font-size:0.85rem;margin:0 0.5rem}
+
+.empty-state{text-align:center;padding:3rem;color:var(--text-muted)}.empty-state .icon{font-size:3rem;margin-bottom:1rem}
+.toast-container{position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:2000;display:flex;flex-direction:column;gap:0.5rem}
+.toast{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 20px;color:var(--text-primary);font-family:'Tajawal',sans-serif;font-size:0.9rem;box-shadow:var(--shadow);animation:toastIn 0.3s ease;display:flex;align-items:center;gap:8px}
+.toast.success{border-color:var(--success)}.toast.error{border-color:var(--danger)}
+@keyframes toastIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+.custom-val{color:var(--text-secondary);font-size:0.85rem}
+
+@media(max-width:768px){.header{padding:0 1rem}.header-stats{display:none}.nav{padding:0 0.5rem}.nav-btn{padding:12px 14px;font-size:0.85rem}.main{padding:1rem}.stats-grid{grid-template-columns:repeat(2,1fr)}.toolbar{flex-direction:column}.search-box{min-width:100%}.form-row{grid-template-columns:1fr}.reports-grid{grid-template-columns:1fr}.stat-card-value{font-size:1.4rem}.add-field-form{flex-direction:column}.inv-header{flex-direction:column;gap:12px}.inv-meta{flex-direction:column;gap:8px}}
+
+@media print{
+  body,body::before,.header,.nav,.toast-container{display:none!important}
+  .modal-overlay{position:static!important;background:none!important;display:block!important;padding:0!important}
+  .modal-overlay .modal{box-shadow:none!important;border:none!important;max-width:100%!important;max-height:none!important;animation:none!important;background:#fff!important}
+  .modal-header,.modal-footer{display:none!important}
+  .modal-body{padding:0!important}
+  .invoice-preview{border-radius:0!important}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo"><div class="logo-icon">📚</div><span class="logo-text">كاشير أوروك</span></div>
+  <div class="header-stats">
+    <div class="header-stat"><div class="header-stat-value" id="headerTotal">0</div><div class="header-stat-label">إجمالي الكتب</div></div>
+    <div class="header-stat"><div class="header-stat-value" id="headerValue">0</div><div class="header-stat-label">قيمة المخزون</div></div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn active" data-page="books"><span class="icon">📖</span> الكتب</button>
+  <button class="nav-btn" data-page="add"><span class="icon">➕</span> إضافة كتاب</button>
+  <button class="nav-btn" data-page="sell"><span class="icon">🧾</span> نقطة البيع</button>
+  <button class="nav-btn" data-page="sales"><span class="icon">💰</span> المبيعات</button>
+  <button class="nav-btn" data-page="reports"><span class="icon">📊</span> التقارير</button>
+  <button class="nav-btn" data-page="settings"><span class="icon">⚙️</span> الإعدادات</button>
+</div>
+
+<div class="main">
+
+  <!-- ============ BOOKS PAGE ============ -->
+  <div class="page active" id="page-books">
+    <div class="stats-grid">
+      <div class="stat-card stock"><div class="stat-card-icon">📦</div><div class="stat-card-value" id="statTotalBooks">0</div><div class="stat-card-label">إجمالي العناوين</div></div>
+      <div class="stat-card"><div class="stat-card-icon">📚</div><div class="stat-card-value" id="statTotalCopies">0</div><div class="stat-card-label">إجمالي النسخ</div></div>
+      <div class="stat-card sales"><div class="stat-card-icon">💰</div><div class="stat-card-value" id="statStockValue">0</div><div class="stat-card-label">قيمة المخزون</div></div>
+      <div class="stat-card profit"><div class="stat-card-icon">📈</div><div class="stat-card-value" id="statExpectedProfit">0</div><div class="stat-card-label">الربح المتوقع</div></div>
+    </div>
+    <div class="toolbar">
+      <div class="search-box"><span class="search-icon">🔍</span><input type="text" id="searchInput" placeholder="ابحث عن كتاب..." oninput="filterBooks()"></div>
+      <div class="filter-group">
+        <select id="categoryFilter" onchange="filterBooks()"><option value="">كل الأقسام</option></select>
+        <select id="stockFilter" onchange="filterBooks()"><option value="">كل الحالات</option><option value="ok">متوفر</option><option value="low">كمية قليلة</option><option value="out">نفذ</option></select>
+      </div>
+      <button class="btn btn-secondary" onclick="exportData()">📥 تصدير</button>
+      <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()">📤 استيراد</button>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+    </div>
+    <div class="table-container"><div class="table-scroll"><table><thead><tr id="booksTableHead"></tr></thead><tbody id="booksTableBody"></tbody></table></div><div class="pagination" id="booksPagination"></div></div>
+  </div>
+
+  <!-- ============ ADD BOOK PAGE ============ -->
+  <div class="page" id="page-add">
+    <div style="max-width:700px">
+      <h2 style="font-family:'Readex Pro',sans-serif;font-size:1.3rem;margin-bottom:1.5rem">📝 إضافة كتاب جديد</h2>
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem">
+        <div class="form-group"><label class="form-label">اسم الكتاب *</label><input type="text" class="form-input" id="addTitle" placeholder="أدخل اسم الكتاب"></div>
+        <div class="form-row"><div class="form-group"><label class="form-label">المؤلف</label><input type="text" class="form-input" id="addAuthor" placeholder="اسم المؤلف"></div><div class="form-group"><label class="form-label">القسم</label><input type="text" class="form-input" id="addCategory" placeholder="أدب، تاريخ، علوم" list="categoryList"><datalist id="categoryList"></datalist></div></div>
+        <div class="form-row"><div class="form-group"><label class="form-label">سعر الشراء *</label><input type="number" class="form-input" id="addBuyPrice" placeholder="0" min="0" step="250"></div><div class="form-group"><label class="form-label">سعر البيع *</label><input type="number" class="form-input" id="addSellPrice" placeholder="0" min="0" step="250"></div></div>
+        <div class="form-row"><div class="form-group"><label class="form-label">الكمية *</label><input type="number" class="form-input" id="addQuantity" placeholder="1" min="1" value="1"></div><div class="form-group"><label class="form-label">ISBN</label><input type="text" class="form-input" id="addISBN" placeholder="رقم ISBN"></div></div>
+        <div class="form-group"><label class="form-label">ملاحظات</label><input type="text" class="form-input" id="addNotes" placeholder="ملاحظات إضافية"></div>
+        <div id="addCustomFieldsContainer"></div>
+        <div style="margin-top:1.5rem;display:flex;gap:0.75rem"><button class="btn btn-primary" onclick="addBook()">➕ إضافة الكتاب</button><button class="btn btn-secondary" onclick="clearAddForm()">🔄 مسح</button></div>
+      </div>
+      <div class="fields-manager">
+        <div class="fields-manager-header"><div class="fields-manager-title">⚙️ إدارة الحقول المخصصة</div><span style="font-size:0.78rem;color:var(--text-muted)">أضف حقول إضافية</span></div>
+        <div class="fields-manager-body">
+          <div id="customFieldsList"></div>
+          <div class="add-field-form">
+            <div class="form-group" style="flex:2"><label class="form-label">اسم الحقل</label><input type="text" class="form-input" id="newFieldName" placeholder="مثال: عدد الصفحات"></div>
+            <div class="form-group"><label class="form-label">نوع الحقل</label><select class="form-input" id="newFieldType"><option value="text">نص</option><option value="number">رقم</option><option value="select">قائمة</option></select></div>
+            <div class="form-group" id="selectOptionsGroup" style="display:none;flex:2"><label class="form-label">الاختيارات (فاصلة)</label><input type="text" class="form-input" id="newFieldOptions" placeholder="جديد، مستعمل، نادر"></div>
+            <button class="btn btn-purple" onclick="addCustomField()" style="height:40px">➕ إضافة حقل</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ POINT OF SALE PAGE ============ -->
+  <div class="page" id="page-sell">
+    <h2 style="font-family:'Readex Pro',sans-serif;font-size:1.3rem;margin-bottom:1.5rem">🧾 نقطة البيع</h2>
+    <div style="display:grid;grid-template-columns:1fr 380px;gap:1.5rem">
+      <!-- Book Search -->
+      <div>
+        <div class="search-box" style="margin-bottom:1rem"><span class="search-icon">🔍</span><input type="text" id="posSearch" placeholder="ابحث عن كتاب لإضافته للفاتورة..." oninput="renderPosBooks()"></div>
+        <div class="table-container"><div class="table-scroll"><table>
+          <thead><tr><th>الكتاب</th><th>المؤلف</th><th>السعر</th><th>المتوفر</th><th>إضافة</th></tr></thead>
+          <tbody id="posTableBody"></tbody>
+        </table></div></div>
+      </div>
+      <!-- Cart -->
+      <div>
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.2rem">
+          <div style="font-weight:700;font-size:1rem;margin-bottom:12px;display:flex;align-items:center;gap:8px">🛒 سلة الفاتورة</div>
+          <div class="form-group"><label class="form-label">اسم الزبون</label><input type="text" class="form-input" id="customerName" placeholder="اسم الزبون (اختياري)"></div>
+          <div class="cart-items" id="cartItems"><div class="empty-state" style="padding:1.5rem"><p>أضف كتب من الجدول</p></div></div>
+          <!-- Delivery Fee -->
+          <div style="margin-bottom:10px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+              <label class="form-label" style="margin:0">🚚 أجرة التوصيل</label>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:0.85rem;color:var(--success)">
+                <input type="checkbox" id="freeDelivery" onchange="toggleFreeDelivery()" style="width:18px;height:18px;cursor:pointer;accent-color:var(--success)">
+                توصيل مجاني
+              </label>
+            </div>
+            <input type="number" class="form-input" id="deliveryFee" placeholder="0" min="0" step="500" value="0" oninput="updateCartTotal()" style="font-family:'Readex Pro',sans-serif">
+            <div id="freeDeliveryBadge" style="display:none;margin-top:6px;padding:6px 12px;background:var(--success-bg);border:1px solid rgba(16,185,129,0.2);border-radius:6px;text-align:center;font-weight:600;font-size:0.88rem;color:var(--success)">✅ توصيل مجاني</div>
+          </div>
+          <div class="cart-total"><span>المجموع الكلي</span><span class="cart-total-value" id="cartTotal">0 د.ع</span></div>
+          <div style="margin-top:1rem;display:flex;gap:0.75rem">
+            <button class="btn btn-primary" onclick="processInvoice()" style="flex:1">🧾 إصدار فاتورة</button>
+            <button class="btn btn-danger" onclick="clearCart()">🗑️</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SALES PAGE ============ -->
+  <div class="page" id="page-sales">
+    <h2 style="font-family:'Readex Pro',sans-serif;font-size:1.3rem;margin-bottom:1.5rem">💰 سجل المبيعات</h2>
+    <div class="stats-grid">
+      <div class="stat-card profit"><div class="stat-card-icon">💵</div><div class="stat-card-value" id="salesTotalRevenue">0</div><div class="stat-card-label">إجمالي المبيعات</div></div>
+      <div class="stat-card"><div class="stat-card-icon">📦</div><div class="stat-card-value" id="salesTotalQty">0</div><div class="stat-card-label">نسخة مباعة</div></div>
+      <div class="stat-card profit"><div class="stat-card-icon">📈</div><div class="stat-card-value" id="salesTotalProfit">0</div><div class="stat-card-label">صافي الربح</div></div>
+    </div>
+    <div class="table-container"><div class="table-scroll"><table><thead><tr><th>#</th><th>رقم الفاتورة</th><th>الزبون</th><th>العناصر</th><th>المجموع</th><th>الربح</th><th>التاريخ</th><th>فاتورة</th><th>حذف</th></tr></thead><tbody id="salesTableBody"></tbody></table></div><div class="pagination" id="salesPagination"></div></div>
+  </div>
+
+  <!-- ============ REPORTS PAGE ============ -->
+  <div class="page" id="page-reports">
+    <h2 style="font-family:'Readex Pro',sans-serif;font-size:1.3rem;margin-bottom:1.5rem">📊 التقارير</h2>
+    <div class="reports-grid">
+      <div class="report-card"><div class="report-header"><div class="report-title">📋 ملخص عام</div></div><div class="report-body" id="reportSummary"></div></div>
+      <div class="report-card"><div class="report-header"><div class="report-title">🏷️ حسب القسم</div></div><div class="report-body" id="reportCategories"></div></div>
+      <div class="report-card"><div class="report-header"><div class="report-title">🔥 الأكثر مبيعاً</div></div><div class="report-body" id="reportTopSelling"></div></div>
+      <div class="report-card"><div class="report-header"><div class="report-title">⚠️ مخزون منخفض</div></div><div class="report-body" id="reportLowStock"></div></div>
+    </div>
+  </div>
+
+  <!-- ============ SETTINGS PAGE ============ -->
+  <div class="page" id="page-settings">
+    <h2 style="font-family:'Readex Pro',sans-serif;font-size:1.3rem;margin-bottom:1.5rem">⚙️ إعدادات المكتبة</h2>
+    <div class="settings-section">
+      <div class="settings-title">🏪 معلومات المكتبة (تظهر في الفاتورة)</div>
+      <div class="form-group"><label class="form-label">اسم المكتبة</label><input type="text" class="form-input" id="setStoreName" placeholder="مكتبة النور"></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">رقم الهاتف</label><input type="text" class="form-input" id="setPhone" placeholder="07xxxxxxxxx"></div>
+        <div class="form-group"><label class="form-label">العنوان</label><input type="text" class="form-input" id="setAddress" placeholder="كركوك - شارع ..."></div>
+      </div>
+      <div class="form-group"><label class="form-label">شعار المكتبة (إيموجي أو نص قصير)</label><input type="text" class="form-input" id="setLogo" placeholder="📚" maxlength="4"></div>
+      <div class="form-group"><label class="form-label">نص أسفل الفاتورة</label><input type="text" class="form-input" id="setFooter" placeholder="شكراً لزيارتكم!"></div>
+      <button class="btn btn-primary" onclick="saveSettings()">💾 حفظ الإعدادات</button>
+    </div>
+    <div class="settings-section">
+      <div class="settings-title">🗑️ إدارة البيانات</div>
+      <p style="font-size:0.9rem;color:var(--text-secondary);margin-bottom:1rem;line-height:1.7">إذا تريد تبدأ من الصفر وتحذف الكتب التجريبية، اضغط الزر الأول. الكتب التجريبية لن ترجع مرة ثانية.</p>
+      <div style="display:flex;gap:0.75rem;flex-wrap:wrap">
+        <button class="btn btn-purple" onclick="clearAllSampleData()">🧹 حذف الكتب التجريبية والبدء من الصفر</button>
+        <button class="btn btn-danger" onclick="resetAllData()">⚠️ حذف كل شي وإعادة ضبط المصنع</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal-overlay" id="editModal"><div class="modal">
+  <div class="modal-header"><div class="modal-title">✏️ تعديل كتاب</div><button class="modal-close" onclick="closeEditModal()">&times;</button></div>
+  <div class="modal-body">
+    <input type="hidden" id="editId">
+    <div class="form-group"><label class="form-label">اسم الكتاب</label><input type="text" class="form-input" id="editTitle"></div>
+    <div class="form-row"><div class="form-group"><label class="form-label">المؤلف</label><input type="text" class="form-input" id="editAuthor"></div><div class="form-group"><label class="form-label">القسم</label><input type="text" class="form-input" id="editCategory"></div></div>
+    <div class="form-row"><div class="form-group"><label class="form-label">سعر الشراء</label><input type="number" class="form-input" id="editBuyPrice" min="0" step="250"></div><div class="form-group"><label class="form-label">سعر البيع</label><input type="number" class="form-input" id="editSellPrice" min="0" step="250"></div></div>
+    <div class="form-row"><div class="form-group"><label class="form-label">الكمية</label><input type="number" class="form-input" id="editQuantity" min="0"></div><div class="form-group"><label class="form-label">ISBN</label><input type="text" class="form-input" id="editISBN"></div></div>
+    <div class="form-group"><label class="form-label">ملاحظات</label><input type="text" class="form-input" id="editNotes"></div>
+    <div id="editCustomFieldsContainer"></div>
+  </div>
+  <div class="modal-footer"><button class="btn btn-primary" onclick="saveEdit()">💾 حفظ</button><button class="btn btn-secondary" onclick="closeEditModal()">إلغاء</button></div>
+</div></div>
+
+<!-- Rename Modal -->
+<div class="modal-overlay" id="renameModal"><div class="modal" style="max-width:400px">
+  <div class="modal-header"><div class="modal-title">✏️ تغيير اسم الحقل</div><button class="modal-close" onclick="closeRenameModal()">&times;</button></div>
+  <div class="modal-body"><input type="hidden" id="renameFieldId"><div class="form-group"><label class="form-label">الاسم الجديد</label><input type="text" class="form-input" id="renameFieldValue"></div></div>
+  <div class="modal-footer"><button class="btn btn-primary" onclick="confirmRename()">💾 حفظ</button><button class="btn btn-secondary" onclick="closeRenameModal()">إلغاء</button></div>
+</div></div>
+
+<!-- Invoice Modal -->
+<div class="modal-overlay" id="invoiceModal"><div class="modal wide">
+  <div class="modal-header"><div class="modal-title">🧾 معاينة الفاتورة</div><button class="modal-close" onclick="closeInvoiceModal()">&times;</button></div>
+  <div class="modal-body" id="invoiceContent"></div>
+  <div class="modal-footer">
+    <button class="btn btn-primary" onclick="printInvoice()">🖨️ طباعة</button>
+    <button class="btn btn-success" onclick="downloadInvoicePDF()">📄 تحميل PDF</button>
+    <button class="btn btn-secondary" onclick="closeInvoiceModal()">إغلاق</button>
+  </div>
+</div></div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+// ==================== FIREBASE INIT ====================
+const firebaseConfig = {
+  apiKey: "AIzaSyBy-j81lsM7QFThEOQfwJjClp8UBZGAoKg",
+  authDomain: "uruklibrary.firebaseapp.com",
+  projectId: "uruklibrary",
+  storageBucket: "uruklibrary.firebasestorage.app",
+  messagingSenderId: "353522982892",
+  appId: "1:353522982892:web:c305d7ee5cb6a2dccb2ac9"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// ==================== CLOUD DATA LAYER ====================
+// Local cache for speed
+let _books = [], _sales = [], _fields = [], _settings = {}, _dataLoaded = false;
+
+async function loadAllData() {
+  showToast('جاري تحميل البيانات...', 'success');
+  try {
+    const [booksSnap, salesSnap, fieldsSnap, settingsSnap] = await Promise.all([
+      db.collection('books').get(),
+      db.collection('sales').get(),
+      db.collection('customFields').get(),
+      db.collection('settings').doc('main').get()
+    ]);
+    _books = booksSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    _sales = salesSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    _fields = fieldsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    _settings = settingsSnap.exists ? settingsSnap.data() : {};
+    _dataLoaded = true;
+    showToast('تم تحميل البيانات ✅');
+  } catch (e) {
+    console.error('Firebase load error:', e);
+    showToast('خطأ بالاتصال - جاري استخدام البيانات المحلية', 'error');
+    _books = JSON.parse(localStorage.getItem('library_books') || '[]');
+    _sales = JSON.parse(localStorage.getItem('library_sales') || '[]');
+    _fields = JSON.parse(localStorage.getItem('library_custom_fields') || '[]');
+    _settings = JSON.parse(localStorage.getItem('library_settings') || '{}');
+    _dataLoaded = true;
+  }
+}
+
+function getBooks() { return _books; }
+function getSales() { return _sales; }
+function getCustomFields() { return _fields; }
+function getSettings() { return _settings; }
+
+async function saveBooks(books) {
+  _books = books;
+  localStorage.setItem('library_books', JSON.stringify(books));
+  try {
+    const batch = db.batch();
+    const existing = await db.collection('books').get();
+    existing.docs.forEach(d => batch.delete(d.ref));
+    books.forEach(b => { const { id, ...data } = b; batch.set(db.collection('books').doc(id), data); });
+    await batch.commit();
+  } catch (e) { console.error('Save books error:', e); }
+}
+
+async function saveSales(sales) {
+  _sales = sales;
+  localStorage.setItem('library_sales', JSON.stringify(sales));
+  try {
+    const batch = db.batch();
+    const existing = await db.collection('sales').get();
+    existing.docs.forEach(d => batch.delete(d.ref));
+    sales.forEach(s => { const { id, ...data } = s; batch.set(db.collection('sales').doc(id), data); });
+    await batch.commit();
+  } catch (e) { console.error('Save sales error:', e); }
+}
+
+async function saveCustomFields(fields) {
+  _fields = fields;
+  localStorage.setItem('library_custom_fields', JSON.stringify(fields));
+  try {
+    const batch = db.batch();
+    const existing = await db.collection('customFields').get();
+    existing.docs.forEach(d => batch.delete(d.ref));
+    fields.forEach(f => { const { id, ...data } = f; batch.set(db.collection('customFields').doc(id), data); });
+    await batch.commit();
+  } catch (e) { console.error('Save fields error:', e); }
+}
+
+async function saveSettingsData(s) {
+  _settings = s;
+  localStorage.setItem('library_settings', JSON.stringify(s));
+  try { await db.collection('settings').doc('main').set(s); } catch (e) { console.error('Save settings error:', e); }
+}
+
+const ITEMS_PER_PAGE = 20;
+let currentBookPage=1, currentSalePage=1, cart=[];
+function generateId(){return Date.now().toString(36)+Math.random().toString(36).substr(2,5)}
+function formatNum(n){if(n===undefined||n===null)return'0';return Number(n).toLocaleString('ar-IQ')}
+function showToast(msg,type='success'){const c=document.getElementById('toastContainer'),t=document.createElement('div');t.className=`toast ${type}`;t.innerHTML=`${type==='success'?'✅':'❌'} ${msg}`;c.appendChild(t);setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.remove(),300)},3000)}
+
+// ==================== NAV ====================
+document.querySelectorAll('.nav-btn').forEach(btn=>{btn.addEventListener('click',()=>{const page=btn.dataset.page;showPage(page)})});
+function showPage(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(`page-${page}`).classList.add('active');
+  document.querySelector(`.nav-btn[data-page="${page}"]`).classList.add('active');
+  if(page==='books')renderBooks();
+  if(page==='add'){renderCustomFieldsList();renderAddCustomFields()}
+  if(page==='sell')renderPosBooks();
+  if(page==='sales')renderSales();
+  if(page==='reports')renderReports();
+  if(page==='settings')loadSettings();
+  updateHeaderStats();
+}
+
+// ==================== CUSTOM FIELDS ====================
+document.getElementById('newFieldType').addEventListener('change',function(){document.getElementById('selectOptionsGroup').style.display=this.value==='select'?'':'none'});
+function addCustomField(){const name=document.getElementById('newFieldName').value.trim(),type=document.getElementById('newFieldType').value,optStr=document.getElementById('newFieldOptions').value.trim();if(!name){showToast('يرجى إدخال اسم الحقل','error');return}const fields=getCustomFields();if(fields.some(f=>f.name===name)){showToast('يوجد حقل بنفس الاسم','error');return}const field={id:generateId(),name,type,options:[]};if(type==='select'&&optStr)field.options=optStr.split(/[,،]/).map(o=>o.trim()).filter(Boolean);fields.push(field);saveCustomFields(fields);document.getElementById('newFieldName').value='';document.getElementById('newFieldOptions').value='';document.getElementById('newFieldType').value='text';document.getElementById('selectOptionsGroup').style.display='none';renderCustomFieldsList();renderAddCustomFields();renderBooks();showToast(`تمت إضافة حقل "${name}"`)}
+function deleteCustomField(id){const fields=getCustomFields(),f=fields.find(x=>x.id===id);if(!f||!confirm(`حذف حقل "${f.name}"؟`))return;const books=getBooks();books.forEach(b=>{if(b.customFields)delete b.customFields[id]});saveBooks(books);saveCustomFields(fields.filter(x=>x.id!==id));renderCustomFieldsList();renderAddCustomFields();renderBooks();showToast(`تم حذف "${f.name}"`)}
+function openRenameModal(id){const f=getCustomFields().find(x=>x.id===id);if(!f)return;document.getElementById('renameFieldId').value=id;document.getElementById('renameFieldValue').value=f.name;document.getElementById('renameModal').classList.add('active');setTimeout(()=>document.getElementById('renameFieldValue').focus(),100)}
+function closeRenameModal(){document.getElementById('renameModal').classList.remove('active')}
+function confirmRename(){const id=document.getElementById('renameFieldId').value,nn=document.getElementById('renameFieldValue').value.trim();if(!nn){showToast('يرجى إدخال اسم','error');return}const fields=getCustomFields(),f=fields.find(x=>x.id===id);if(!f)return;if(fields.some(x=>x.id!==id&&x.name===nn)){showToast('يوجد حقل بنفس الاسم','error');return}const old=f.name;f.name=nn;saveCustomFields(fields);closeRenameModal();renderCustomFieldsList();renderAddCustomFields();renderBooks();showToast(`تم تغيير "${old}" إلى "${nn}"`)}
+function renderCustomFieldsList(){const fields=getCustomFields(),c=document.getElementById('customFieldsList');if(!fields.length){c.innerHTML='<div style="text-align:center;padding:1rem;color:var(--text-muted);font-size:0.9rem">لا توجد حقول مخصصة</div>';return}const tl={text:'نص',number:'رقم',select:'قائمة'};c.innerHTML=fields.map(f=>`<div class="custom-field-item"><span class="field-name">${f.name}</span><span class="field-type">${tl[f.type]||f.type}${f.type==='select'?' ('+f.options.length+')':''}</span><div class="field-actions"><button class="btn btn-secondary btn-xs" onclick="openRenameModal('${f.id}')">✏️</button><button class="btn btn-danger btn-xs" onclick="deleteCustomField('${f.id}')">🗑️</button></div></div>`).join('')}
+function renderAddCustomFields(){const fields=getCustomFields(),c=document.getElementById('addCustomFieldsContainer');if(!fields.length){c.innerHTML='';return}let h='<div style="border-top:1px dashed var(--border-light);margin-top:1rem;padding-top:1rem"><div style="font-size:0.85rem;font-weight:600;color:var(--purple);margin-bottom:0.75rem">⚡ حقول مخصصة</div>';for(let i=0;i<fields.length;i+=2){const f1=fields[i],f2=fields[i+1];if(f2)h+=`<div class="form-row">${rfi(f1,'add')}${rfi(f2,'add')}</div>`;else h+=rfi(f1,'add')}h+='</div>';c.innerHTML=h}
+function rfi(field,prefix){const id=`${prefix}_cf_${field.id}`;let inp='';if(field.type==='select')inp=`<select class="form-input" id="${id}"><option value="">اختر...</option>${field.options.map(o=>`<option value="${o}">${o}</option>`).join('')}</select>`;else if(field.type==='number')inp=`<input type="number" class="form-input" id="${id}" placeholder="0">`;else inp=`<input type="text" class="form-input" id="${id}" placeholder="${field.name}">`;return`<div class="form-group"><label class="form-label">${field.name}</label>${inp}</div>`}
+function getCFV(prefix){const fields=getCustomFields(),v={};fields.forEach(f=>{const el=document.getElementById(`${prefix}_cf_${f.id}`);if(el)v[f.id]=f.type==='number'?(el.value?parseFloat(el.value):''):el.value.trim()});return v}
+function setCFV(prefix,values){getCustomFields().forEach(f=>{const el=document.getElementById(`${prefix}_cf_${f.id}`);if(el&&values&&values[f.id]!==undefined)el.value=values[f.id]})}
+
+// ==================== BOOKS ====================
+function addBook(){const title=document.getElementById('addTitle').value.trim(),author=document.getElementById('addAuthor').value.trim(),category=document.getElementById('addCategory').value.trim(),buyPrice=parseFloat(document.getElementById('addBuyPrice').value)||0,sellPrice=parseFloat(document.getElementById('addSellPrice').value)||0,quantity=parseInt(document.getElementById('addQuantity').value)||1,isbn=document.getElementById('addISBN').value.trim(),notes=document.getElementById('addNotes').value.trim(),cf=getCFV('add');if(!title){showToast('يرجى إدخال اسم الكتاب','error');return}if(!buyPrice&&!sellPrice){showToast('يرجى إدخال سعر','error');return}const books=getBooks();books.push({id:generateId(),title,author,category,buyPrice,sellPrice,quantity,isbn,notes,customFields:cf,dateAdded:new Date().toISOString(),totalSold:0});saveBooks(books);clearAddForm();showToast(`تمت إضافة "${title}"`);updateCategoryFilter();updateHeaderStats()}
+function clearAddForm(){['addTitle','addAuthor','addCategory','addBuyPrice','addSellPrice','addISBN','addNotes'].forEach(id=>document.getElementById(id).value='');document.getElementById('addQuantity').value='1';getCustomFields().forEach(f=>{const el=document.getElementById(`add_cf_${f.id}`);if(el)el.value=''})}
+
+function renderBooks(){
+  const books=getFilteredBooks(),allBooks=getBooks(),fields=getCustomFields(),thead=document.getElementById('booksTableHead'),tbody=document.getElementById('booksTableBody');
+  const totalPages=Math.ceil(books.length/ITEMS_PER_PAGE);if(currentBookPage>totalPages)currentBookPage=Math.max(1,totalPages);
+  let hdr='<th>#</th><th>اسم الكتاب</th><th>المؤلف</th><th>القسم</th><th>سعر الشراء</th><th>سعر البيع</th><th>الربح</th><th>الكمية</th>';
+  fields.forEach(f=>{hdr+=`<th>${f.name}</th>`});hdr+='<th>الإجراءات</th>';thead.innerHTML=hdr;
+  const start=(currentBookPage-1)*ITEMS_PER_PAGE,pageBooks=books.slice(start,start+ITEMS_PER_PAGE),tc=9+fields.length;
+  if(!books.length){tbody.innerHTML=`<tr><td colspan="${tc}"><div class="empty-state"><div class="icon">📚</div><p>لا توجد كتب</p></div></td></tr>`;document.getElementById('booksPagination').innerHTML='';updateStats(allBooks);return}
+  tbody.innerHTML=pageBooks.map((b,i)=>{const profit=b.sellPrice-b.buyPrice,pc=profit>=0?'price-profit':'price-loss',sc=b.quantity===0?'stock-out':b.quantity<=3?'stock-low':'stock-ok',sl=b.quantity===0?'نفذ':b.quantity<=3?'قليل':'متوفر';let cc='';fields.forEach(f=>{const v=(b.customFields&&b.customFields[f.id])||'';cc+=`<td class="custom-val">${v!==''?(f.type==='number'?formatNum(v):v):'—'}</td>`});return`<tr><td style="color:var(--text-muted)">${start+i+1}</td><td class="book-title-cell">${b.title}</td><td class="book-author">${b.author||'—'}</td><td>${b.category?`<span class="category-tag">${b.category}</span>`:'—'}</td><td class="price price-buy">${formatNum(b.buyPrice)}</td><td class="price price-sell">${formatNum(b.sellPrice)}</td><td class="price ${pc}">${profit>=0?'+':''}${formatNum(profit)}</td><td><span class="stock-badge ${sc}">${sl} (${b.quantity})</span></td>${cc}<td><div class="actions-cell"><button class="btn btn-secondary btn-sm" onclick="openEditModal('${b.id}')">✏️</button><button class="btn btn-danger btn-sm" onclick="deleteBook('${b.id}')">🗑️</button></div></td></tr>`}).join('');
+  renderPagination('booksPagination',currentBookPage,totalPages,p=>{currentBookPage=p;renderBooks()});updateStats(allBooks);
+}
+function getFilteredBooks(){let books=getBooks();const s=document.getElementById('searchInput').value.trim().toLowerCase(),cat=document.getElementById('categoryFilter').value,st=document.getElementById('stockFilter').value;if(s)books=books.filter(b=>b.title.toLowerCase().includes(s)||(b.author&&b.author.toLowerCase().includes(s))||(b.isbn&&b.isbn.includes(s)));if(cat)books=books.filter(b=>b.category===cat);if(st==='ok')books=books.filter(b=>b.quantity>3);if(st==='low')books=books.filter(b=>b.quantity>0&&b.quantity<=3);if(st==='out')books=books.filter(b=>b.quantity===0);return books}
+function filterBooks(){currentBookPage=1;renderBooks()}
+function deleteBook(id){if(!confirm('حذف هذا الكتاب؟'))return;saveBooks(getBooks().filter(b=>b.id!==id));renderBooks();updateCategoryFilter();updateHeaderStats();showToast('تم الحذف')}
+function updateStats(books){document.getElementById('statTotalBooks').textContent=formatNum(books.length);document.getElementById('statTotalCopies').textContent=formatNum(books.reduce((s,b)=>s+b.quantity,0));document.getElementById('statStockValue').textContent=formatNum(books.reduce((s,b)=>s+(b.buyPrice*b.quantity),0));document.getElementById('statExpectedProfit').textContent=formatNum(books.reduce((s,b)=>s+((b.sellPrice-b.buyPrice)*b.quantity),0))}
+function updateHeaderStats(){const books=getBooks();document.getElementById('headerTotal').textContent=formatNum(books.length);document.getElementById('headerValue').textContent=formatNum(books.reduce((s,b)=>s+(b.buyPrice*b.quantity),0))}
+function updateCategoryFilter(){const cats=[...new Set(getBooks().map(b=>b.category).filter(Boolean))].sort(),sel=document.getElementById('categoryFilter'),cur=sel.value;sel.innerHTML='<option value="">كل الأقسام</option>'+cats.map(c=>`<option value="${c}">${c}</option>`).join('');if(cats.includes(cur))sel.value=cur;document.getElementById('categoryList').innerHTML=cats.map(c=>`<option value="${c}">`).join('')}
+
+// ==================== EDIT ====================
+function openEditModal(id){const book=getBooks().find(b=>b.id===id);if(!book)return;document.getElementById('editId').value=id;document.getElementById('editTitle').value=book.title;document.getElementById('editAuthor').value=book.author||'';document.getElementById('editCategory').value=book.category||'';document.getElementById('editBuyPrice').value=book.buyPrice;document.getElementById('editSellPrice').value=book.sellPrice;document.getElementById('editQuantity').value=book.quantity;document.getElementById('editISBN').value=book.isbn||'';document.getElementById('editNotes').value=book.notes||'';const fields=getCustomFields(),c=document.getElementById('editCustomFieldsContainer');if(fields.length){let h='<div style="border-top:1px dashed var(--border-light);margin-top:1rem;padding-top:1rem"><div style="font-size:0.85rem;font-weight:600;color:var(--purple);margin-bottom:0.75rem">⚡ حقول مخصصة</div>';for(let i=0;i<fields.length;i+=2){const f1=fields[i],f2=fields[i+1];if(f2)h+=`<div class="form-row">${rfi(f1,'edit')}${rfi(f2,'edit')}</div>`;else h+=rfi(f1,'edit')}h+='</div>';c.innerHTML=h;setTimeout(()=>setCFV('edit',book.customFields||{}),10)}else c.innerHTML='';document.getElementById('editModal').classList.add('active')}
+function closeEditModal(){document.getElementById('editModal').classList.remove('active')}
+function saveEdit(){const id=document.getElementById('editId').value,books=getBooks(),book=books.find(b=>b.id===id);if(!book)return;book.title=document.getElementById('editTitle').value.trim();book.author=document.getElementById('editAuthor').value.trim();book.category=document.getElementById('editCategory').value.trim();book.buyPrice=parseFloat(document.getElementById('editBuyPrice').value)||0;book.sellPrice=parseFloat(document.getElementById('editSellPrice').value)||0;book.quantity=parseInt(document.getElementById('editQuantity').value)||0;book.isbn=document.getElementById('editISBN').value.trim();book.notes=document.getElementById('editNotes').value.trim();book.customFields=getCFV('edit');saveBooks(books);closeEditModal();renderBooks();updateCategoryFilter();updateHeaderStats();showToast('تم التحديث')}
+
+// ==================== POS & CART ====================
+function renderPosBooks(){
+  const s=document.getElementById('posSearch').value.trim().toLowerCase();
+  let books=getBooks().filter(b=>b.quantity>0);
+  if(s)books=books.filter(b=>b.title.toLowerCase().includes(s)||(b.author&&b.author.toLowerCase().includes(s)));
+  const tbody=document.getElementById('posTableBody');
+  if(!books.length){tbody.innerHTML='<tr><td colspan="5"><div class="empty-state" style="padding:1.5rem"><p>لا توجد نتائج</p></div></td></tr>';return}
+  tbody.innerHTML=books.slice(0,50).map(b=>`<tr><td class="book-title-cell">${b.title}</td><td class="book-author">${b.author||'—'}</td><td class="price price-sell">${formatNum(b.sellPrice)}</td><td><span class="stock-badge ${b.quantity<=3?'stock-low':'stock-ok'}">${b.quantity}</span></td><td><button class="btn btn-success btn-sm" onclick="addToCart('${b.id}')">➕</button></td></tr>`).join('');
+}
+
+function addToCart(bookId){
+  const book=getBooks().find(b=>b.id===bookId);if(!book)return;
+  const existing=cart.find(c=>c.bookId===bookId);
+  const inCartQty=existing?existing.qty:0;
+  if(inCartQty>=book.quantity){showToast('لا يوجد مخزون كافٍ','error');return}
+  if(existing)existing.qty++;
+  else cart.push({bookId,title:book.title,price:book.sellPrice,buyPrice:book.buyPrice,qty:1});
+  renderCart();
+}
+
+function removeFromCart(idx){cart.splice(idx,1);renderCart()}
+function updateCartQty(idx,val){const item=cart[idx];const book=getBooks().find(b=>b.id===item.bookId);if(val<1)val=1;if(book&&val>book.quantity)val=book.quantity;item.qty=val;renderCart()}
+
+function renderCart(){
+  const c=document.getElementById('cartItems');
+  if(!cart.length){c.innerHTML='<div class="empty-state" style="padding:1.5rem"><p>أضف كتب من الجدول</p></div>';document.getElementById('cartTotal').textContent='0 د.ع';return}
+  c.innerHTML=cart.map((item,i)=>`<div class="cart-item"><span class="cart-item-name">${item.title}</span><span class="cart-item-detail"><input type="number" value="${item.qty}" min="1" style="width:50px;background:var(--bg-card);border:1px solid var(--border);border-radius:4px;color:var(--text-primary);text-align:center;padding:2px;font-family:'Tajawal'" onchange="updateCartQty(${i},parseInt(this.value))"></span><span class="cart-item-price">${formatNum(item.price*item.qty)} د.ع</span><button class="cart-item-remove" onclick="removeFromCart(${i})">✕</button></div>`).join('');
+  updateCartTotal();
+}
+
+function clearCart(){cart=[];renderCart();document.getElementById('customerName').value='';document.getElementById('deliveryFee').value='0';document.getElementById('freeDelivery').checked=false;toggleFreeDelivery()}
+
+function toggleFreeDelivery(){
+  const checked=document.getElementById('freeDelivery').checked;
+  const input=document.getElementById('deliveryFee');
+  const badge=document.getElementById('freeDeliveryBadge');
+  if(checked){input.style.display='none';input.value='0';badge.style.display='block'}
+  else{input.style.display='';badge.style.display='none'}
+  updateCartTotal();
+}
+
+function updateCartTotal(){
+  const itemsTotal=cart.reduce((s,item)=>s+item.price*item.qty,0);
+  const isFree=document.getElementById('freeDelivery').checked;
+  const delivery=isFree?0:(parseFloat(document.getElementById('deliveryFee').value)||0);
+  const grand=itemsTotal+delivery;
+  document.getElementById('cartTotal').textContent=formatNum(grand)+' د.ع';
+}
+
+// ==================== INVOICE ====================
+function getInvoiceNumber(){let num=parseInt(localStorage.getItem('library_invoice_num'))||1000;num++;localStorage.setItem('library_invoice_num',num.toString());return num}
+
+function processInvoice(){
+  if(!cart.length){showToast('السلة فارغة!','error');return}
+  const customer=document.getElementById('customerName').value.trim()||'زبون';
+  const isFreeDelivery=document.getElementById('freeDelivery').checked;
+  const deliveryFee=isFreeDelivery?0:(parseFloat(document.getElementById('deliveryFee').value)||0);
+  const invoiceNum=getInvoiceNumber();
+  const now=new Date();
+  const items=cart.map(c=>({...c}));
+  const itemsTotal=items.reduce((s,i)=>s+i.price*i.qty,0);
+  const total=itemsTotal+deliveryFee;
+  const totalProfit=items.reduce((s,i)=>s+(i.price-i.buyPrice)*i.qty,0);
+
+  const books=getBooks();
+  items.forEach(item=>{const book=books.find(b=>b.id===item.bookId);if(book){book.quantity-=item.qty;book.totalSold=(book.totalSold||0)+item.qty}});
+  saveBooks(books);
+
+  const sales=getSales();
+  const sale={id:generateId(),invoiceNum,customer,items,total,itemsTotal,deliveryFee,freeDelivery:isFreeDelivery,profit:totalProfit,date:now.toISOString()};
+  sales.push(sale);saveSales(sales);
+
+  showInvoice(sale);
+  clearCart();renderPosBooks();updateHeaderStats();
+  showToast(`تم إصدار الفاتورة #${invoiceNum}`);
+}
+
+function showInvoice(sale){
+  const s=getSettings();
+  const d=new Date(sale.date);
+  const dateStr=`${d.getFullYear()}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getDate().toString().padStart(2,'0')}`;
+  const timeStr=`${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
+
+  let html=`<div class="invoice-preview" id="invoicePrint">
+    <div class="inv-header">
+      <div class="inv-store-info">
+        <div class="inv-store-name">${s.storeName||'المكتبة'}</div>
+        <div class="inv-store-detail">
+          ${s.phone?'📞 '+s.phone+'<br>':''}
+          ${s.address?'📍 '+s.address:''}
+        </div>
+      </div>
+      <div class="inv-logo">${s.logo||'📚'}</div>
+    </div>
+    <div class="inv-meta">
+      <div class="inv-meta-item"><div class="inv-meta-label">رقم الفاتورة</div><div class="inv-meta-value">#${sale.invoiceNum}</div></div>
+      <div class="inv-meta-item"><div class="inv-meta-label">التاريخ</div><div class="inv-meta-value">${dateStr}</div></div>
+      <div class="inv-meta-item"><div class="inv-meta-label">الوقت</div><div class="inv-meta-value">${timeStr}</div></div>
+      <div class="inv-meta-item"><div class="inv-meta-label">الزبون</div><div class="inv-meta-value">${sale.customer}</div></div>
+    </div>
+    <div class="inv-body">
+      <table class="inv-table">
+        <thead><tr><th>#</th><th>الكتاب</th><th>الكمية</th><th>السعر</th><th>المجموع</th></tr></thead>
+        <tbody>${sale.items.map((item,i)=>`<tr><td>${i+1}</td><td style="font-weight:600">${item.title}</td><td>${item.qty}</td><td>${formatNum(item.price)} د.ع</td><td style="font-weight:700">${formatNum(item.price*item.qty)} د.ع</td></tr>`).join('')}</tbody>
+      </table>
+      <div class="inv-totals"><div class="inv-totals-box">
+        <div class="inv-totals-row"><span>عدد العناصر</span><span>${sale.items.reduce((s,i)=>s+i.qty,0)}</span></div>
+        <div class="inv-totals-row"><span>مجموع الكتب</span><span>${formatNum(sale.itemsTotal||sale.total)} د.ع</span></div>
+        <div class="inv-totals-row"><span>🚚 أجرة التوصيل</span><span>${sale.freeDelivery?'<span style="color:#059669;font-weight:700">مجاني ✅</span>':(sale.deliveryFee?formatNum(sale.deliveryFee)+' د.ع':'—')}</span></div>
+        <div class="inv-totals-row grand"><span>المجموع الكلي</span><span>${formatNum(sale.total)} د.ع</span></div>
+      </div></div>
+    </div>
+    <div class="inv-footer">${s.footer||'شكراً لزيارتكم!'}</div>
+  </div>`;
+
+  document.getElementById('invoiceContent').innerHTML=html;
+  document.getElementById('invoiceModal').classList.add('active');
+}
+
+function closeInvoiceModal(){document.getElementById('invoiceModal').classList.remove('active')}
+
+function printInvoice(){window.print()}
+
+function downloadInvoicePDF(){
+  const el=document.getElementById('invoicePrint');if(!el)return;
+  const printWindow=window.open('','_blank');
+  printWindow.document.write(`<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>فاتورة</title><link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Readex+Pro:wght@400;600;700;800&display=swap" rel="stylesheet"><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Tajawal',sans-serif;background:#fff;color:#1a1a1a;padding:20px}
+  .inv-header{display:flex;justify-content:space-between;align-items:flex-start;padding:24px 28px;border-bottom:3px solid #f59e0b}
+  .inv-store-name{font-family:'Readex Pro',sans-serif;font-size:1.5rem;font-weight:800;margin-bottom:4px}
+  .inv-store-detail{font-size:0.85rem;color:#555;line-height:1.6}
+  .inv-logo{width:70px;height:70px;border-radius:12px;background:linear-gradient(135deg,#f59e0b,#d97706);display:flex;align-items:center;justify-content:center;font-size:2rem;color:#fff}
+  .inv-meta{display:flex;justify-content:space-between;padding:16px 28px;background:#fefce8;border-bottom:1px solid #fef3c7}
+  .inv-meta-item{text-align:center}
+  .inv-meta-label{font-size:0.75rem;color:#92400e;font-weight:600}
+  .inv-meta-value{font-family:'Readex Pro',sans-serif;font-size:1rem;font-weight:700;margin-top:2px}
+  .inv-body{padding:20px 28px}
+  .inv-table{width:100%;border-collapse:collapse;margin-bottom:16px}
+  .inv-table th{background:#f8fafc;padding:10px 12px;text-align:right;font-weight:700;font-size:0.82rem;color:#475569;border-bottom:2px solid #e2e8f0}
+  .inv-table td{padding:10px 12px;border-bottom:1px solid #f1f5f9;font-size:0.88rem}
+  .inv-totals{display:flex;justify-content:flex-start;margin-top:12px}
+  .inv-totals-box{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px 20px;min-width:220px}
+  .inv-totals-row{display:flex;justify-content:space-between;padding:4px 0;font-size:0.9rem}
+  .inv-totals-row.grand{border-top:2px solid #e2e8f0;margin-top:6px;padding-top:8px;font-weight:800;font-size:1.05rem;color:#059669}
+  .inv-footer{text-align:center;padding:16px 28px;background:#f8fafc;border-top:1px solid #e2e8f0;font-size:0.8rem;color:#94a3b8}
+  @media print{body{padding:0}}</style></head><body>${el.innerHTML}<script>setTimeout(()=>{window.print();window.close()},500)<\/script></body></html>`);
+  printWindow.document.close();
+}
+
+// ==================== SALES ====================
+function renderSales(){
+  const sales=getSales().slice().reverse(),tbody=document.getElementById('salesTableBody');
+  const totalPages=Math.ceil(sales.length/ITEMS_PER_PAGE);if(currentSalePage>totalPages)currentSalePage=Math.max(1,totalPages);
+  const start=(currentSalePage-1)*ITEMS_PER_PAGE,pageSales=sales.slice(start,start+ITEMS_PER_PAGE);
+  document.getElementById('salesTotalRevenue').textContent=formatNum(sales.reduce((s,x)=>s+x.total,0));
+  document.getElementById('salesTotalQty').textContent=formatNum(sales.reduce((s,x)=>s+x.items.reduce((a,i)=>a+i.qty,0),0));
+  document.getElementById('salesTotalProfit').textContent=formatNum(sales.reduce((s,x)=>s+x.profit,0));
+  if(!sales.length){tbody.innerHTML='<tr><td colspan="9"><div class="empty-state"><div class="icon">🧾</div><p>لا توجد مبيعات</p></div></td></tr>';document.getElementById('salesPagination').innerHTML='';return}
+  tbody.innerHTML=pageSales.map((s,i)=>{const d=new Date(s.date),ds=`${d.getFullYear()}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getDate().toString().padStart(2,'0')}`;const itemCount=s.items.reduce((a,x)=>a+x.qty,0);return`<tr><td style="color:var(--text-muted)">${start+i+1}</td><td style="font-family:'Readex Pro';font-weight:600">#${s.invoiceNum||'—'}</td><td>${s.customer||'—'}</td><td>${itemCount} كتاب</td><td class="price price-sell">${formatNum(s.total)} د.ع</td><td class="price ${s.profit>=0?'price-profit':'price-loss'}">${s.profit>=0?'+':''}${formatNum(s.profit)}</td><td style="color:var(--text-muted);font-size:0.85rem">${ds}</td><td><button class="btn btn-secondary btn-sm" onclick='viewSaleInvoice("${s.id}")'>🧾</button></td><td><button class="btn btn-danger btn-sm" onclick="deleteSale('${s.id}')">🗑️</button></td></tr>`}).join('');
+  renderPagination('salesPagination',currentSalePage,totalPages,p=>{currentSalePage=p;renderSales()});
+}
+
+function viewSaleInvoice(id){const sale=getSales().find(s=>s.id===id);if(sale)showInvoice(sale)}
+
+function deleteSale(id){
+  if(!confirm('حذف هذه العملية؟'))return;const sales=getSales(),sale=sales.find(s=>s.id===id);
+  if(sale){const books=getBooks();sale.items.forEach(item=>{const book=books.find(b=>b.id===item.bookId);if(book){book.quantity+=item.qty;book.totalSold=Math.max(0,(book.totalSold||0)-item.qty)}});saveBooks(books)}
+  saveSales(sales.filter(s=>s.id!==id));renderSales();updateHeaderStats();showToast('تم الحذف');
+}
+
+// ==================== REPORTS ====================
+function renderReports(){
+  const books=getBooks(),sales=getSales();
+  const sv=books.reduce((s,b)=>s+(b.buyPrice*b.quantity),0),slv=books.reduce((s,b)=>s+(b.sellPrice*b.quantity),0);
+  const ts=sales.reduce((s,x)=>s+x.items.reduce((a,i)=>a+i.qty,0),0),tr=sales.reduce((s,x)=>s+x.total,0),tp=sales.reduce((s,x)=>s+x.profit,0);
+  document.getElementById('reportSummary').innerHTML=[['عدد العناوين',formatNum(books.length)],['إجمالي النسخ',formatNum(books.reduce((s,b)=>s+b.quantity,0))],['قيمة المخزون (شراء)',formatNum(sv)+' د.ع'],['قيمة المخزون (بيع)',formatNum(slv)+' د.ع'],['النسخ المباعة',formatNum(ts)],['إجمالي الإيرادات',formatNum(tr)+' د.ع'],['صافي الربح',`<span style="color:${tp>=0?'var(--success)':'var(--danger)'}">${formatNum(tp)} د.ع</span>`]].map(([l,v])=>`<div class="report-item"><span class="report-item-label">${l}</span><span class="report-item-value">${v}</span></div>`).join('');
+  const cm={};books.forEach(b=>{const c=b.category||'بدون قسم';if(!cm[c])cm[c]={count:0,copies:0,value:0};cm[c].count++;cm[c].copies+=b.quantity;cm[c].value+=b.buyPrice*b.quantity});const ce=Object.entries(cm).sort((a,b)=>b[1].copies-a[1].copies);
+  document.getElementById('reportCategories').innerHTML=ce.length===0?'<div class="empty-state"><p>لا توجد بيانات</p></div>':ce.map(([c,d])=>`<div class="report-item"><span class="report-item-label">${c} <span style="color:var(--text-muted)">(${d.count} عنوان)</span></span><span class="report-item-value">${formatNum(d.value)} د.ع</span></div>`).join('');
+  const sm={};sales.forEach(s=>s.items.forEach(i=>{if(!sm[i.title])sm[i.title]={qty:0,revenue:0};sm[i.title].qty+=i.qty;sm[i.title].revenue+=i.price*i.qty}));const tSold=Object.entries(sm).sort((a,b)=>b[1].qty-a[1].qty).slice(0,10);
+  document.getElementById('reportTopSelling').innerHTML=tSold.length===0?'<div class="empty-state"><p>لا توجد مبيعات</p></div>':tSold.map(([t,d])=>`<div class="report-item"><span class="report-item-label">${t} <span style="color:var(--text-muted)">(${d.qty} نسخة)</span></span><span class="report-item-value" style="color:var(--success)">${formatNum(d.revenue)} د.ع</span></div>`).join('');
+  const ls=books.filter(b=>b.quantity<=3).sort((a,b)=>a.quantity-b.quantity).slice(0,10);
+  document.getElementById('reportLowStock').innerHTML=ls.length===0?'<div class="empty-state"><p>👍 كل الكتب متوفرة</p></div>':ls.map(b=>`<div class="report-item"><span class="report-item-label">${b.title}</span><span class="stock-badge ${b.quantity===0?'stock-out':'stock-low'}">${b.quantity===0?'نفذ':b.quantity+' نسخة'}</span></div>`).join('');
+}
+
+// ==================== SETTINGS ====================
+function loadSettings(){const s=getSettings();document.getElementById('setStoreName').value=s.storeName||'';document.getElementById('setPhone').value=s.phone||'';document.getElementById('setAddress').value=s.address||'';document.getElementById('setLogo').value=s.logo||'';document.getElementById('setFooter').value=s.footer||''}
+function saveSettings(){const s={storeName:document.getElementById('setStoreName').value.trim(),phone:document.getElementById('setPhone').value.trim(),address:document.getElementById('setAddress').value.trim(),logo:document.getElementById('setLogo').value.trim(),footer:document.getElementById('setFooter').value.trim()};saveSettingsData(s);showToast('تم حفظ الإعدادات')}
+
+// ==================== PAGINATION ====================
+function renderPagination(cid,current,total,onChange){const c=document.getElementById(cid);if(total<=1){c.innerHTML='';return}let h=`<button class="page-btn" ${current===1?'disabled':''}>→</button>`;const r=[];for(let i=Math.max(1,current-2);i<=Math.min(total,current+2);i++)r.push(i);if(r[0]>1){h+=`<button class="page-btn" data-p="1">1</button>`;if(r[0]>2)h+=`<span class="page-info">...</span>`}r.forEach(p=>{h+=`<button class="page-btn ${p===current?'active':''}" data-p="${p}">${p}</button>`});if(r[r.length-1]<total){if(r[r.length-1]<total-1)h+=`<span class="page-info">...</span>`;h+=`<button class="page-btn" data-p="${total}">${total}</button>`}h+=`<button class="page-btn" ${current===total?'disabled':''}>←</button>`;c.innerHTML=h;c.querySelectorAll('.page-btn').forEach(btn=>{btn.addEventListener('click',()=>{const p=btn.dataset.p;if(p)onChange(parseInt(p));else if(btn.textContent==='→')onChange(current-1);else if(btn.textContent==='←')onChange(current+1)})})}
+
+// ==================== IMPORT / EXPORT ====================
+function exportData(){const data={books:getBooks(),sales:getSales(),customFields:getCustomFields(),settings:getSettings(),exportDate:new Date().toISOString()};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`library-backup-${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(url);showToast('تم التصدير')}
+function importData(event){const file=event.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=function(e){try{const data=JSON.parse(e.target.result);if(data.books&&Array.isArray(data.books)){const ex=getBooks(),eids=new Set(ex.map(b=>b.id));let added=0;data.books.forEach(b=>{if(!eids.has(b.id)){ex.push(b);added++}});saveBooks(ex);if(data.sales){const es=getSales(),esi=new Set(es.map(s=>s.id));(Array.isArray(data.sales)?data.sales:[]).forEach(s=>{if(!esi.has(s.id))es.push(s)});saveSales(es)}if(data.customFields){const ef=getCustomFields(),efi=new Set(ef.map(f=>f.id));data.customFields.forEach(f=>{if(!efi.has(f.id))ef.push(f)});saveCustomFields(ef)}if(data.settings)saveSettingsData({...getSettings(),...data.settings});renderBooks();updateCategoryFilter();updateHeaderStats();renderCustomFieldsList();renderAddCustomFields();showToast(`تم استيراد ${added} كتاب`)}else showToast('ملف غير صالح','error')}catch{showToast('خطأ في القراءة','error')}};reader.readAsText(file);event.target.value=''}
+
+// ==================== DATA MANAGEMENT ====================
+function clearAllSampleData(){
+  if(!confirm('هل تريد حذف جميع الكتب التجريبية والبدء من الصفر؟'))return;
+  saveBooks([]);saveSales([]);
+  localStorage.setItem('library_initialized','yes');
+  renderBooks();renderSales();updateCategoryFilter();updateHeaderStats();
+  showToast('تم حذف جميع البيانات التجريبية. ابدأ بإضافة كتبك الحقيقية!');
+}
+
+function resetAllData(){
+  if(!confirm('⚠️ تحذير: هذا سيحذف كل البيانات (كتب، مبيعات، إعدادات). هل أنت متأكد؟'))return;
+  if(!confirm('تأكيد أخير: لا يمكن التراجع. متأكد؟'))return;
+  saveBooks([]);saveSales([]);saveCustomFields([]);saveSettingsData({});
+  localStorage.removeItem('library_initialized');localStorage.removeItem('library_invoice_num');
+  location.reload();
+}
+
+// ==================== INIT ====================
+async function init(){
+  await loadAllData();
+  if(!getBooks().length){
+    const initialized=localStorage.getItem('library_initialized');
+    if(!initialized){
+      const samples=[{title:'ألف ليلة وليلة',author:'مجهول',category:'أدب كلاسيكي',buyPrice:15000,sellPrice:25000,quantity:8},{title:'مقدمة ابن خلدون',author:'ابن خلدون',category:'تاريخ',buyPrice:20000,sellPrice:35000,quantity:5},{title:'النبي',author:'جبران خليل جبران',category:'أدب',buyPrice:8000,sellPrice:15000,quantity:12},{title:'طوق الحمامة',author:'ابن حزم',category:'أدب كلاسيكي',buyPrice:12000,sellPrice:20000,quantity:3},{title:'رجال في الشمس',author:'غسان كنفاني',category:'روايات',buyPrice:10000,sellPrice:18000,quantity:7},{title:'البخلاء',author:'الجاحظ',category:'أدب كلاسيكي',buyPrice:14000,sellPrice:22000,quantity:6},{title:'الأيام',author:'طه حسين',category:'سيرة ذاتية',buyPrice:11000,sellPrice:19000,quantity:4},{title:'في الطريق',author:'نجيب محفوظ',category:'روايات',buyPrice:9000,sellPrice:16000,quantity:10},{title:'تعلم البرمجة',author:'أحمد المبرمج',category:'تقنية',buyPrice:25000,sellPrice:40000,quantity:2},{title:'أساسيات الفيزياء',author:'فريدريك بوش',category:'علوم',buyPrice:30000,sellPrice:45000,quantity:1}];
+      await saveBooks(samples.map(s=>({...s,id:generateId(),isbn:'',notes:'',customFields:{},dateAdded:new Date().toISOString(),totalSold:0})));
+      localStorage.setItem('library_initialized','yes');
+    }
+  }
+  if(!getSettings().storeName)await saveSettingsData({storeName:'',phone:'',address:'',logo:'📚',footer:'شكراً لزيارتكم!'});
+  updateCategoryFilter();renderBooks();renderCustomFieldsList();renderAddCustomFields();updateHeaderStats();
+}
+init();
+</script>
+</body>
+</html>
