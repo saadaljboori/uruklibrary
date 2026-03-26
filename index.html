@@ -583,7 +583,7 @@ async function saveSettingsData(s) {
 const ITEMS_PER_PAGE = 20;
 let currentBookPage=1, currentSalePage=1, cart=[];
 function generateId(){return Date.now().toString(36)+Math.random().toString(36).substr(2,5)}
-function formatNum(n){if(n===undefined||n===null)return'0';return Number(n).toLocaleString('ar-IQ')}
+function formatNum(n){if(n===undefined||n===null)return'0';return Number(n).toLocaleString('en-US')}
 function showToast(msg,type='success'){const c=document.getElementById('toastContainer'),t=document.createElement('div');t.className=`toast ${type}`;t.innerHTML=`${type==='success'?'✅':'❌'} ${msg}`;c.appendChild(t);setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.remove(),300)},3000)}
 
 // ==================== NAV ====================
@@ -767,27 +767,46 @@ function printInvoice(){window.print()}
 
 function downloadInvoicePDF(){
   const el=document.getElementById('invoicePrint');if(!el)return;
-  const printWindow=window.open('','_blank');
-  printWindow.document.write(`<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>فاتورة</title><link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Readex+Pro:wght@400;600;700;800&display=swap" rel="stylesheet"><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Tajawal',sans-serif;background:#fff;color:#1a1a1a;padding:20px}
-  .inv-header{display:flex;justify-content:space-between;align-items:flex-start;padding:24px 28px;border-bottom:3px solid #f59e0b}
-  .inv-store-name{font-family:'Readex Pro',sans-serif;font-size:1.5rem;font-weight:800;margin-bottom:4px}
-  .inv-store-detail{font-size:0.85rem;color:#555;line-height:1.6}
-  .inv-logo{width:70px;height:70px;border-radius:12px;background:linear-gradient(135deg,#f59e0b,#d97706);display:flex;align-items:center;justify-content:center;font-size:2rem;color:#fff}
-  .inv-meta{display:flex;justify-content:space-between;padding:16px 28px;background:#fefce8;border-bottom:1px solid #fef3c7}
-  .inv-meta-item{text-align:center}
-  .inv-meta-label{font-size:0.75rem;color:#92400e;font-weight:600}
-  .inv-meta-value{font-family:'Readex Pro',sans-serif;font-size:1rem;font-weight:700;margin-top:2px}
-  .inv-body{padding:20px 28px}
-  .inv-table{width:100%;border-collapse:collapse;margin-bottom:16px}
-  .inv-table th{background:#f8fafc;padding:10px 12px;text-align:right;font-weight:700;font-size:0.82rem;color:#475569;border-bottom:2px solid #e2e8f0}
-  .inv-table td{padding:10px 12px;border-bottom:1px solid #f1f5f9;font-size:0.88rem}
-  .inv-totals{display:flex;justify-content:flex-start;margin-top:12px}
-  .inv-totals-box{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px 20px;min-width:220px}
-  .inv-totals-row{display:flex;justify-content:space-between;padding:4px 0;font-size:0.9rem}
-  .inv-totals-row.grand{border-top:2px solid #e2e8f0;margin-top:6px;padding-top:8px;font-weight:800;font-size:1.05rem;color:#059669}
-  .inv-footer{text-align:center;padding:16px 28px;background:#f8fafc;border-top:1px solid #e2e8f0;font-size:0.8rem;color:#94a3b8}
-  @media print{body{padding:0}}</style></head><body>${el.innerHTML}<script>setTimeout(()=>{window.print();window.close()},500)<\/script></body></html>`);
-  printWindow.document.close();
+  const invoiceHTML=`<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>فاتورة</title><link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Readex+Pro:wght@400;600;700;800&display=swap" rel="stylesheet"><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Tajawal',sans-serif;background:#fff;color:#1a1a1a;padding:16px;direction:rtl}
+  .inv-header{display:flex;justify-content:space-between;align-items:flex-start;padding:20px;border-bottom:3px solid #f59e0b}
+  .inv-store-name{font-family:'Readex Pro',sans-serif;font-size:1.4rem;font-weight:800;margin-bottom:4px}
+  .inv-store-detail{font-size:0.82rem;color:#555;line-height:1.6}
+  .inv-logo{width:60px;height:60px;border-radius:12px;background:linear-gradient(135deg,#f59e0b,#d97706);display:flex;align-items:center;justify-content:center;font-size:1.8rem;color:#fff;overflow:hidden}
+  .inv-logo img{width:100%;height:100%;object-fit:cover;border-radius:12px}
+  .inv-meta{display:flex;flex-wrap:wrap;justify-content:space-between;padding:12px 20px;background:#fefce8;border-bottom:1px solid #fef3c7}
+  .inv-meta-item{text-align:center;min-width:80px}
+  .inv-meta-label{font-size:0.7rem;color:#92400e;font-weight:600}
+  .inv-meta-value{font-family:'Readex Pro',sans-serif;font-size:0.9rem;font-weight:700;margin-top:2px}
+  .inv-body{padding:16px 20px}
+  .inv-table{width:100%;border-collapse:collapse;margin-bottom:12px}
+  .inv-table th{background:#f8fafc;padding:8px;text-align:right;font-weight:700;font-size:0.78rem;color:#475569;border-bottom:2px solid #e2e8f0}
+  .inv-table td{padding:8px;border-bottom:1px solid #f1f5f9;font-size:0.82rem}
+  .inv-totals{margin-top:12px}
+  .inv-totals-box{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 16px;max-width:250px}
+  .inv-totals-row{display:flex;justify-content:space-between;padding:3px 0;font-size:0.85rem}
+  .inv-totals-row.grand{border-top:2px solid #e2e8f0;margin-top:4px;padding-top:6px;font-weight:800;font-size:1rem;color:#059669}
+  .inv-footer{text-align:center;padding:12px 20px;background:#f8fafc;border-top:1px solid #e2e8f0;font-size:0.75rem;color:#94a3b8;margin-top:12px}
+  .no-print{padding:20px;text-align:center}
+  .print-btn{background:#f59e0b;color:#000;border:none;padding:12px 32px;border-radius:8px;font-family:'Tajawal',sans-serif;font-size:1rem;font-weight:700;cursor:pointer}
+  @media print{.no-print{display:none}body{padding:0}}</style></head><body>${el.innerHTML}<div class="no-print"><button class="print-btn" onclick="window.print()">🖨️ طباعة / حفظ كـ PDF</button><p style="margin-top:8px;font-size:0.8rem;color:#888">اختر "Save as PDF" أو "حفظ كـ PDF" من خيارات الطباعة</p></div></body></html>`;
+  
+  // Try blob approach for better mobile support
+  const blob = new Blob([invoiceHTML], {type: 'text/html;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.target = '_blank';
+  
+  // On mobile, open in new tab with print button
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  if(isMobile){
+    window.open(url, '_blank');
+  } else {
+    // Desktop: open and auto-print
+    const w = window.open(url, '_blank');
+    if(w) w.onload = () => { setTimeout(()=>{ w.print(); }, 800); };
+  }
+  setTimeout(()=>URL.revokeObjectURL(url), 60000);
 }
 
 // ==================== WHATSAPP SHARE ====================
