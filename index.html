@@ -200,7 +200,87 @@ tbody tr{transition:background 0.15s}tbody tr:hover{background:var(--bg-card-hov
 @keyframes toastIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
 .custom-val{color:var(--text-secondary);font-size:0.85rem}
 
-@media(max-width:768px){.header{padding:0 1rem}.header-stats{display:none}.nav{padding:0 0.5rem}.nav-btn{padding:12px 14px;font-size:0.85rem}.main{padding:1rem}.stats-grid{grid-template-columns:repeat(2,1fr)}.toolbar{flex-direction:column}.search-box{min-width:100%}.form-row{grid-template-columns:1fr}.reports-grid{grid-template-columns:1fr}.stat-card-value{font-size:1.4rem}.add-field-form{flex-direction:column}.inv-header{flex-direction:column;gap:12px}.inv-meta{flex-direction:column;gap:8px}}
+/* Light mode */
+body.light-mode{--bg-primary:#f5f5f5;--bg-secondary:#ffffff;--bg-card:#ffffff;--bg-card-hover:#f0f0f0;--bg-input:#f8f8f8;--text-primary:#1a1a1a;--text-secondary:#555;--text-muted:#888;--border:#e0e0e0;--border-light:#d0d0d0;--shadow:0 4px 24px rgba(0,0,0,0.08)}
+body.light-mode::before{background:radial-gradient(ellipse at 20% 0%,rgba(245,158,11,0.04) 0%,transparent 50%),radial-gradient(ellipse at 80% 100%,rgba(59,130,246,0.03) 0%,transparent 50%)}
+body.light-mode .logo-text{-webkit-text-fill-color:#d97706}
+body.light-mode .header{background:rgba(255,255,255,0.95)}
+body.light-mode .nav{background:rgba(255,255,255,0.95)}
+
+/* Theme toggle */
+.theme-toggle{background:var(--bg-card);border:1px solid var(--border);border-radius:20px;padding:6px 12px;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;transition:all 0.2s}
+.theme-toggle:hover{border-color:var(--accent)}
+
+@media(max-width:768px){
+  .header{padding:0 0.75rem;height:56px}
+  .header-stats{display:none}
+  .logo-text{font-size:1rem}
+  .logo-icon{width:34px;height:34px}
+  .nav{padding:0;top:56px;gap:0}
+  .nav-btn{padding:10px 12px;font-size:0.78rem;gap:4px}
+  .nav-btn .icon{font-size:0.9rem}
+  .main{padding:0.75rem}
+  .stats-grid{grid-template-columns:repeat(2,1fr);gap:0.5rem;margin-bottom:1rem}
+  .stat-card{padding:0.8rem}
+  .stat-card-value{font-size:1.3rem}
+  .stat-card-label{font-size:0.75rem}
+  .stat-card-icon{font-size:1.2rem;margin-bottom:0.3rem}
+  .toolbar{flex-direction:column;gap:0.5rem;margin-bottom:1rem}
+  .search-box{min-width:100%}
+  .search-box input{padding:10px 12px 10px 38px;font-size:0.85rem}
+  .filter-group{width:100%}
+  .filter-group select{flex:1;padding:8px 10px;font-size:0.82rem}
+  .btn{padding:8px 14px;font-size:0.82rem}
+  .form-row{grid-template-columns:1fr}
+  .form-input{padding:8px 10px;font-size:0.88rem}
+  .form-label{font-size:0.8rem}
+  .reports-grid{grid-template-columns:1fr}
+  .add-field-form{flex-direction:column}
+  .table-container{border-radius:8px}
+  table{min-width:600px}
+  thead th{padding:8px 10px;font-size:0.75rem}
+  tbody td{padding:8px 10px;font-size:0.8rem}
+  .actions-cell{gap:2px}
+  .btn-sm{padding:5px 8px;font-size:0.72rem}
+  /* POS mobile layout */
+  #page-sell > h2 ~ div{grid-template-columns:1fr!important;gap:1rem}
+  .cart-items{max-height:150px}
+  .cart-item{padding:6px 8px}
+  .cart-item-name{font-size:0.8rem}
+  .cart-total{padding:10px;font-size:0.9rem}
+  /* Modal mobile */
+  .modal{max-width:100%;max-height:100vh;border-radius:8px;margin:0.5rem}
+  .modal.wide{max-width:100%}
+  .modal-header{padding:1rem}
+  .modal-body{padding:1rem}
+  .modal-footer{padding:0.75rem 1rem;flex-wrap:wrap;gap:0.5rem}
+  .modal-footer .btn{flex:1;min-width:calc(50% - 0.5rem);justify-content:center;font-size:0.8rem;padding:8px 10px}
+  /* Invoice mobile */
+  .inv-header{flex-direction:column;gap:12px;padding:16px}
+  .inv-meta{flex-direction:column;gap:8px;padding:12px 16px}
+  .inv-meta-item{display:flex;justify-content:space-between;text-align:right}
+  .inv-body{padding:12px 16px}
+  .inv-table th{padding:6px 8px;font-size:0.72rem}
+  .inv-table td{padding:6px 8px;font-size:0.78rem}
+  .inv-totals-box{min-width:100%;width:100%}
+  .inv-footer{padding:12px 16px;font-size:0.75rem}
+  .inv-store-name{font-size:1.2rem}
+  .inv-logo{width:55px;height:55px}
+  /* Settings mobile */
+  .settings-section{padding:1rem}
+  /* Empty state */
+  .empty-state{padding:2rem}
+  .empty-state .icon{font-size:2rem}
+  .empty-state p{font-size:0.85rem}
+  /* Page title */
+  h2{font-size:1.1rem!important}
+}
+
+@media(max-width:400px){
+  .nav-btn{padding:8px 8px;font-size:0.7rem}
+  .stat-card-value{font-size:1.1rem}
+  .stats-grid{gap:0.4rem}
+}
 
 @media print{
   body,body::before,.header,.nav,.toast-container{display:none!important}
@@ -219,6 +299,7 @@ tbody tr{transition:background 0.15s}tbody tr:hover{background:var(--bg-card-hov
   <div class="header-stats">
     <div class="header-stat"><div class="header-stat-value" id="headerTotal">0</div><div class="header-stat-label">إجمالي الكتب</div></div>
     <div class="header-stat"><div class="header-stat-value" id="headerValue">0</div><div class="header-stat-label">قيمة المخزون</div></div>
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn" title="تغيير الوضع">🌙</button>
   </div>
 </div>
 
@@ -395,9 +476,10 @@ tbody tr{transition:background 0.15s}tbody tr:hover{background:var(--bg-card-hov
 <div class="modal-overlay" id="invoiceModal"><div class="modal wide">
   <div class="modal-header"><div class="modal-title">🧾 معاينة الفاتورة</div><button class="modal-close" onclick="closeInvoiceModal()">&times;</button></div>
   <div class="modal-body" id="invoiceContent"></div>
-  <div class="modal-footer">
+  <div class="modal-footer" style="flex-wrap:wrap">
     <button class="btn btn-primary" onclick="printInvoice()">🖨️ طباعة</button>
-    <button class="btn btn-success" onclick="downloadInvoicePDF()">📄 تحميل PDF</button>
+    <button class="btn btn-success" onclick="downloadInvoicePDF()">📄 PDF</button>
+    <button class="btn btn-sm" onclick="shareWhatsApp()" style="background:#25d366;color:#fff;border:none">💬 واتساب</button>
     <button class="btn btn-secondary" onclick="closeInvoiceModal()">إغلاق</button>
   </div>
 </div></div>
@@ -637,6 +719,7 @@ function processInvoice(){
 }
 
 function showInvoice(sale){
+  _lastInvoiceSale = sale;
   const s=getSettings();
   const d=new Date(sale.date);
   const dateStr=`${d.getFullYear()}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getDate().toString().padStart(2,'0')}`;
@@ -706,6 +789,55 @@ function downloadInvoicePDF(){
   @media print{body{padding:0}}</style></head><body>${el.innerHTML}<script>setTimeout(()=>{window.print();window.close()},500)<\/script></body></html>`);
   printWindow.document.close();
 }
+
+// ==================== WHATSAPP SHARE ====================
+let _lastInvoiceSale = null;
+// Store sale reference when showing invoice
+const _origShowInvoice = showInvoice;
+
+function shareWhatsApp(){
+  if(!_lastInvoiceSale) return;
+  const sale = _lastInvoiceSale;
+  const s = getSettings();
+  const d = new Date(sale.date);
+  const dateStr = `${d.getFullYear()}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getDate().toString().padStart(2,'0')}`;
+  
+  let msg = `🧾 *فاتورة #${sale.invoiceNum}*\n`;
+  msg += `📅 ${dateStr}\n`;
+  msg += `👤 ${sale.customer}\n`;
+  if(s.storeName) msg += `🏪 ${s.storeName}\n`;
+  msg += `━━━━━━━━━━━━━━\n`;
+  sale.items.forEach((item,i) => {
+    msg += `${i+1}. ${item.title}\n   ${item.qty} × ${formatNum(item.price)} = ${formatNum(item.price*item.qty)} د.ع\n`;
+  });
+  msg += `━━━━━━━━━━━━━━\n`;
+  if(sale.deliveryFee > 0) msg += `🚚 توصيل: ${formatNum(sale.deliveryFee)} د.ع\n`;
+  if(sale.freeDelivery) msg += `🚚 توصيل مجاني ✅\n`;
+  msg += `💰 *المجموع: ${formatNum(sale.total)} د.ع*\n`;
+  if(s.footer) msg += `\n${s.footer}`;
+  
+  const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+  window.open(url, '_blank');
+}
+
+// ==================== THEME TOGGLE ====================
+function toggleTheme(){
+  const body = document.body;
+  const btn = document.getElementById('themeBtn');
+  body.classList.toggle('light-mode');
+  const isLight = body.classList.contains('light-mode');
+  btn.textContent = isLight ? '🌞' : '🌙';
+  localStorage.setItem('theme', isLight ? 'light' : 'dark');
+}
+
+function loadTheme(){
+  const saved = localStorage.getItem('theme');
+  if(saved === 'light'){
+    document.body.classList.add('light-mode');
+    document.getElementById('themeBtn').textContent = '🌞';
+  }
+}
+loadTheme();
 
 // ==================== SALES ====================
 function renderSales(){
