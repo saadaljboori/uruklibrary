@@ -200,6 +200,21 @@ tbody tr{transition:background 0.15s}tbody tr:hover{background:var(--bg-card-hov
 @keyframes toastIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
 .custom-val{color:var(--text-secondary);font-size:0.85rem}
 
+/* Suggestions */
+.suggestions-box{display:none;position:absolute;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);max-height:150px;overflow-y:auto;z-index:50;width:100%;box-shadow:var(--shadow)}
+.suggestions-box.active{display:block}
+.suggestion-item{padding:8px 12px;cursor:pointer;font-size:0.88rem;border-bottom:1px solid var(--border);transition:background 0.15s}
+.suggestion-item:hover{background:var(--bg-card-hover)}
+.suggestion-item:last-child{border-bottom:none}
+.form-group{position:relative}
+
+/* Reservation status */
+.res-status{padding:4px 10px;border-radius:12px;font-size:0.78rem;font-weight:600}
+.res-pending{background:rgba(245,158,11,0.1);color:var(--accent)}
+.res-done{background:var(--success-bg);color:var(--success)}
+.res-due{background:var(--danger-bg);color:var(--danger);animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.6}}
+
 /* Light mode */
 body.light-mode{--bg-primary:#f5f5f5;--bg-secondary:#ffffff;--bg-card:#ffffff;--bg-card-hover:#f0f0f0;--bg-input:#f8f8f8;--text-primary:#1a1a1a;--text-secondary:#555;--text-muted:#888;--border:#e0e0e0;--border-light:#d0d0d0;--shadow:0 4px 24px rgba(0,0,0,0.08)}
 body.light-mode::before{background:radial-gradient(ellipse at 20% 0%,rgba(245,158,11,0.04) 0%,transparent 50%),radial-gradient(ellipse at 80% 100%,rgba(59,130,246,0.03) 0%,transparent 50%)}
@@ -244,6 +259,7 @@ body.light-mode .nav{background:rgba(255,255,255,0.95)}
   .btn-sm{padding:5px 8px;font-size:0.72rem}
   /* POS mobile layout */
   #page-sell > h2 ~ div{grid-template-columns:1fr!important;gap:1rem}
+  #page-expenses > .stats-grid ~ div{grid-template-columns:1fr!important;gap:1rem}
   .cart-items{max-height:150px}
   .cart-item{padding:6px 8px}
   .cart-item-name{font-size:0.8rem}
@@ -307,6 +323,8 @@ body.light-mode .nav{background:rgba(255,255,255,0.95)}
   <button class="nav-btn active" data-page="books"><span class="icon">📖</span> الكتب</button>
   <button class="nav-btn" data-page="add"><span class="icon">➕</span> إضافة كتاب</button>
   <button class="nav-btn" data-page="sell"><span class="icon">🧾</span> نقطة البيع</button>
+  <button class="nav-btn" data-page="reservations"><span class="icon">📅</span> الحجوزات</button>
+  <button class="nav-btn" data-page="expenses"><span class="icon">💸</span> المصروفات</button>
   <button class="nav-btn" data-page="sales"><span class="icon">💰</span> المبيعات</button>
   <button class="nav-btn" data-page="reports"><span class="icon">📊</span> التقارير</button>
   <button class="nav-btn" data-page="settings"><span class="icon">⚙️</span> الإعدادات</button>
@@ -340,8 +358,8 @@ body.light-mode .nav{background:rgba(255,255,255,0.95)}
     <div style="max-width:700px">
       <h2 style="font-family:'Readex Pro',sans-serif;font-size:1.3rem;margin-bottom:1.5rem">📝 إضافة كتاب جديد</h2>
       <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem">
-        <div class="form-group"><label class="form-label">اسم الكتاب *</label><input type="text" class="form-input" id="addTitle" placeholder="أدخل اسم الكتاب"></div>
-        <div class="form-row"><div class="form-group"><label class="form-label">المؤلف</label><input type="text" class="form-input" id="addAuthor" placeholder="اسم المؤلف"></div><div class="form-group"><label class="form-label">القسم</label><input type="text" class="form-input" id="addCategory" placeholder="أدب، تاريخ، علوم" list="categoryList"><datalist id="categoryList"></datalist></div></div>
+        <div class="form-group"><label class="form-label">اسم الكتاب *</label><input type="text" class="form-input" id="addTitle" placeholder="أدخل اسم الكتاب" oninput="showSuggestions(this,'titleSuggestions','title')" autocomplete="off"><div id="titleSuggestions" class="suggestions-box"></div></div>
+        <div class="form-row"><div class="form-group"><label class="form-label">المؤلف</label><input type="text" class="form-input" id="addAuthor" placeholder="اسم المؤلف" oninput="showSuggestions(this,'authorSuggestions','author')" autocomplete="off"><div id="authorSuggestions" class="suggestions-box"></div></div><div class="form-group"><label class="form-label">القسم</label><input type="text" class="form-input" id="addCategory" placeholder="أدب، تاريخ، علوم" oninput="showSuggestions(this,'categorySuggestions','category')" autocomplete="off"><div id="categorySuggestions" class="suggestions-box"></div></div></div>
         <div class="form-row"><div class="form-group"><label class="form-label">سعر الشراء *</label><input type="number" class="form-input" id="addBuyPrice" placeholder="0" min="0" step="250"></div><div class="form-group"><label class="form-label">سعر البيع *</label><input type="number" class="form-input" id="addSellPrice" placeholder="0" min="0" step="250"></div></div>
         <div class="form-row"><div class="form-group"><label class="form-label">الكمية *</label><input type="number" class="form-input" id="addQuantity" placeholder="1" min="1" value="1"></div><div class="form-group"><label class="form-label">ISBN</label><input type="text" class="form-input" id="addISBN" placeholder="رقم ISBN"></div></div>
         <div class="form-group"><label class="form-label">ملاحظات</label><input type="text" class="form-input" id="addNotes" placeholder="ملاحظات إضافية"></div>
@@ -423,6 +441,67 @@ body.light-mode .nav{background:rgba(255,255,255,0.95)}
       <div class="report-card"><div class="report-header"><div class="report-title">🔥 الأكثر مبيعاً</div></div><div class="report-body" id="reportTopSelling"></div></div>
       <div class="report-card"><div class="report-header"><div class="report-title">⚠️ مخزون منخفض</div></div><div class="report-body" id="reportLowStock"></div></div>
     </div>
+  </div>
+
+  <!-- ============ RESERVATIONS PAGE ============ -->
+  <div class="page" id="page-reservations">
+    <h2 style="font-family:'Readex Pro',sans-serif;font-size:1.3rem;margin-bottom:1.5rem">📅 الحجوزات المسبقة</h2>
+    <div id="reservationAlert" style="display:none;background:var(--accent-glow);border:1px solid var(--accent);border-radius:var(--radius);padding:1rem;margin-bottom:1rem;cursor:pointer" onclick="showDueReservations()">
+      <span style="font-size:1.1rem">🔔</span> <span id="reservationAlertText" style="font-weight:700;color:var(--accent)"></span>
+    </div>
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1.5rem">
+      <div class="form-group"><label class="form-label">اسم الزبون *</label><input type="text" class="form-input" id="resCustomer" placeholder="اسم الزبون"></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">تاريخ التسليم *</label><input type="date" class="form-input" id="resDate"></div>
+        <div class="form-group"><label class="form-label">رقم الهاتف</label><input type="text" class="form-input" id="resPhone" placeholder="07xxxxxxxxx"></div>
+      </div>
+      <div id="resBooksList">
+        <div class="form-group"><label class="form-label">الكتاب المطلوب</label><input type="text" class="form-input res-book-input" placeholder="اسم الكتاب"></div>
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="addResBookField()" style="margin-bottom:1rem">➕ إضافة كتاب آخر</button>
+      <div class="form-group"><label class="form-label">ملاحظات</label><input type="text" class="form-input" id="resNotes" placeholder="ملاحظات إضافية"></div>
+      <button class="btn btn-primary" onclick="addReservation()">📅 حفظ الحجز</button>
+    </div>
+    <div class="table-container"><div class="table-scroll"><table>
+      <thead><tr><th>#</th><th>الزبون</th><th>الهاتف</th><th>الكتب</th><th>تاريخ التسليم</th><th>الحالة</th><th>إجراءات</th></tr></thead>
+      <tbody id="resTableBody"></tbody>
+    </table></div></div>
+  </div>
+
+  <!-- ============ EXPENSES PAGE ============ -->
+  <div class="page" id="page-expenses">
+    <h2 style="font-family:'Readex Pro',sans-serif;font-size:1.3rem;margin-bottom:1.5rem">💸 المصروفات وميزانية الترويج</h2>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-card-icon">💸</div><div class="stat-card-value" id="expTotalExpenses">0</div><div class="stat-card-label">إجمالي المصروفات</div></div>
+      <div class="stat-card stock"><div class="stat-card-icon">📢</div><div class="stat-card-value" id="expTotalPromo">0</div><div class="stat-card-label">ميزانية الترويج</div></div>
+      <div class="stat-card profit"><div class="stat-card-icon">📊</div><div class="stat-card-value" id="expTotalAll">0</div><div class="stat-card-label">المجموع الكلي</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+      <!-- Add Expense -->
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.2rem">
+        <div style="font-weight:700;font-size:1rem;margin-bottom:12px">💸 إضافة مصروف</div>
+        <div class="form-group"><label class="form-label">الوصف *</label><input type="text" class="form-input" id="expDesc" placeholder="مثال: إيجار، كهرباء، نقل"></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">المبلغ *</label><input type="number" class="form-input" id="expAmount" placeholder="0" min="0" step="500"></div>
+          <div class="form-group"><label class="form-label">التاريخ</label><input type="date" class="form-input" id="expDate"></div>
+        </div>
+        <button class="btn btn-primary" onclick="addExpense('expense')">💸 إضافة مصروف</button>
+      </div>
+      <!-- Add Promo -->
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.2rem">
+        <div style="font-weight:700;font-size:1rem;margin-bottom:12px">📢 ميزانية الترويج اليومي</div>
+        <div class="form-group"><label class="form-label">الوصف *</label><input type="text" class="form-input" id="promoDesc" placeholder="مثال: إعلان فيسبوك، منشور إنستغرام"></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">المبلغ *</label><input type="number" class="form-input" id="promoAmount" placeholder="0" min="0" step="500"></div>
+          <div class="form-group"><label class="form-label">التاريخ</label><input type="date" class="form-input" id="promoDate"></div>
+        </div>
+        <button class="btn btn-primary" style="background:linear-gradient(135deg,var(--info),#2563eb);box-shadow:0 2px 8px rgba(59,130,246,0.25)" onclick="addExpense('promo')">📢 إضافة ترويج</button>
+      </div>
+    </div>
+    <div class="table-container" style="margin-top:1.5rem"><div class="table-scroll"><table>
+      <thead><tr><th>#</th><th>النوع</th><th>الوصف</th><th>المبلغ</th><th>التاريخ</th><th>حذف</th></tr></thead>
+      <tbody id="expTableBody"></tbody>
+    </table></div></div>
   </div>
 
   <!-- ============ SETTINGS PAGE ============ -->
@@ -510,16 +589,20 @@ let _books = [], _sales = [], _fields = [], _settings = {}, _dataLoaded = false;
 async function loadAllData() {
   showToast('جاري تحميل البيانات...', 'success');
   try {
-    const [booksSnap, salesSnap, fieldsSnap, settingsSnap] = await Promise.all([
+    const [booksSnap, salesSnap, fieldsSnap, settingsSnap, resSnap, expSnap] = await Promise.all([
       db.collection('books').get(),
       db.collection('sales').get(),
       db.collection('customFields').get(),
-      db.collection('settings').doc('main').get()
+      db.collection('settings').doc('main').get(),
+      db.collection('reservations').get(),
+      db.collection('expenses').get()
     ]);
     _books = booksSnap.docs.map(d => ({ id: d.id, ...d.data() }));
     _sales = salesSnap.docs.map(d => ({ id: d.id, ...d.data() }));
     _fields = fieldsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
     _settings = settingsSnap.exists ? settingsSnap.data() : {};
+    _reservations = resSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    _expenses = expSnap.docs.map(d => ({ id: d.id, ...d.data() }));
     _dataLoaded = true;
     showToast('تم تحميل البيانات ✅');
   } catch (e) {
@@ -529,6 +612,8 @@ async function loadAllData() {
     _sales = JSON.parse(localStorage.getItem('library_sales') || '[]');
     _fields = JSON.parse(localStorage.getItem('library_custom_fields') || '[]');
     _settings = JSON.parse(localStorage.getItem('library_settings') || '{}');
+    _reservations = JSON.parse(localStorage.getItem('library_reservations') || '[]');
+    _expenses = JSON.parse(localStorage.getItem('library_expenses') || '[]');
     _dataLoaded = true;
   }
 }
@@ -596,6 +681,8 @@ function showPage(page){
   if(page==='books')renderBooks();
   if(page==='add'){renderCustomFieldsList();renderAddCustomFields()}
   if(page==='sell')renderPosBooks();
+  if(page==='reservations')renderReservations();
+  if(page==='expenses')renderExpenses();
   if(page==='sales')renderSales();
   if(page==='reports')renderReports();
   if(page==='settings')loadSettings();
@@ -891,6 +978,185 @@ function renderReports(){
   document.getElementById('reportTopSelling').innerHTML=tSold.length===0?'<div class="empty-state"><p>لا توجد مبيعات</p></div>':tSold.map(([t,d])=>`<div class="report-item"><span class="report-item-label">${t} <span style="color:var(--text-muted)">(${d.qty} نسخة)</span></span><span class="report-item-value" style="color:var(--success)">${formatNum(d.revenue)} د.ع</span></div>`).join('');
   const ls=books.filter(b=>b.quantity<=3).sort((a,b)=>a.quantity-b.quantity).slice(0,10);
   document.getElementById('reportLowStock').innerHTML=ls.length===0?'<div class="empty-state"><p>👍 كل الكتب متوفرة</p></div>':ls.map(b=>`<div class="report-item"><span class="report-item-label">${b.title}</span><span class="stock-badge ${b.quantity===0?'stock-out':'stock-low'}">${b.quantity===0?'نفذ':b.quantity+' نسخة'}</span></div>`).join('');
+}
+
+// ==================== AUTOCOMPLETE SUGGESTIONS ====================
+function showSuggestions(input, containerId, field) {
+  const val = input.value.trim().toLowerCase();
+  const container = document.getElementById(containerId);
+  if (val.length < 2) { container.classList.remove('active'); return; }
+  const books = getBooks();
+  let items = [];
+  if (field === 'title') items = [...new Set(books.map(b => b.title).filter(Boolean))];
+  else if (field === 'author') items = [...new Set(books.map(b => b.author).filter(Boolean))];
+  else if (field === 'category') items = [...new Set(books.map(b => b.category).filter(Boolean))];
+  const matches = items.filter(item => item.toLowerCase().includes(val)).slice(0, 6);
+  if (!matches.length) { container.classList.remove('active'); return; }
+  container.innerHTML = matches.map(m => `<div class="suggestion-item" onclick="pickSuggestion(this,'${input.id}')">${m}</div>`).join('');
+  container.classList.add('active');
+}
+function pickSuggestion(el, inputId) {
+  document.getElementById(inputId).value = el.textContent;
+  el.parentElement.classList.remove('active');
+}
+document.addEventListener('click', e => { document.querySelectorAll('.suggestions-box').forEach(b => { if (!b.contains(e.target)) b.classList.remove('active'); }); });
+
+// ==================== RESERVATIONS ====================
+let _reservations = [];
+async function loadReservations() {
+  try { const snap = await db.collection('reservations').get(); _reservations = snap.docs.map(d => ({ id: d.id, ...d.data() })); }
+  catch { _reservations = JSON.parse(localStorage.getItem('library_reservations') || '[]'); }
+}
+function getReservations() { return _reservations; }
+async function saveReservations(res) {
+  _reservations = res;
+  localStorage.setItem('library_reservations', JSON.stringify(res));
+  try {
+    const batch = db.batch();
+    const existing = await db.collection('reservations').get();
+    existing.docs.forEach(d => batch.delete(d.ref));
+    res.forEach(r => { const { id, ...data } = r; batch.set(db.collection('reservations').doc(id), data); });
+    await batch.commit();
+  } catch (e) { console.error('Save reservations error:', e); }
+}
+
+function addResBookField() {
+  const container = document.getElementById('resBooksList');
+  const div = document.createElement('div');
+  div.className = 'form-group';
+  div.style.display = 'flex';
+  div.style.gap = '8px';
+  div.style.alignItems = 'center';
+  div.innerHTML = '<input type="text" class="form-input res-book-input" placeholder="اسم الكتاب" style="flex:1"><button class="btn btn-danger btn-xs" onclick="this.parentElement.remove()">✕</button>';
+  container.appendChild(div);
+}
+
+function addReservation() {
+  const customer = document.getElementById('resCustomer').value.trim();
+  const date = document.getElementById('resDate').value;
+  const phone = document.getElementById('resPhone').value.trim();
+  const notes = document.getElementById('resNotes').value.trim();
+  if (!customer || !date) { showToast('يرجى إدخال اسم الزبون وتاريخ التسليم', 'error'); return; }
+  const bookInputs = document.querySelectorAll('.res-book-input');
+  const books = [];
+  bookInputs.forEach(inp => { if (inp.value.trim()) books.push(inp.value.trim()); });
+  if (!books.length) { showToast('يرجى إدخال كتاب واحد على الأقل', 'error'); return; }
+  const res = getReservations();
+  res.push({ id: generateId(), customer, phone, date, books, notes, status: 'pending', createdAt: new Date().toISOString() });
+  saveReservations(res);
+  document.getElementById('resCustomer').value = '';
+  document.getElementById('resDate').value = '';
+  document.getElementById('resPhone').value = '';
+  document.getElementById('resNotes').value = '';
+  document.getElementById('resBooksList').innerHTML = '<div class="form-group"><label class="form-label">الكتاب المطلوب</label><input type="text" class="form-input res-book-input" placeholder="اسم الكتاب"></div>';
+  renderReservations();
+  showToast('تم حفظ الحجز');
+}
+
+function renderReservations() {
+  const res = getReservations().sort((a, b) => new Date(a.date) - new Date(b.date));
+  const tbody = document.getElementById('resTableBody');
+  const today = new Date().toISOString().slice(0, 10);
+  const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+  
+  // Check for due reservations (due today or tomorrow)
+  const dueRes = res.filter(r => r.status === 'pending' && (r.date === today || r.date === tomorrow));
+  const alertEl = document.getElementById('reservationAlert');
+  const alertText = document.getElementById('reservationAlertText');
+  if (dueRes.length > 0) {
+    alertEl.style.display = 'block';
+    const todayCount = dueRes.filter(r => r.date === today).length;
+    const tomorrowCount = dueRes.filter(r => r.date === tomorrow).length;
+    let msg = '';
+    if (todayCount) msg += `${todayCount} حجز موعده اليوم!`;
+    if (tomorrowCount) msg += `${todayCount ? ' و ' : ''}${tomorrowCount} حجز موعده باكر`;
+    alertText.textContent = msg;
+  } else { alertEl.style.display = 'none'; }
+
+  if (!res.length) { tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><div class="icon">📅</div><p>لا توجد حجوزات</p></div></td></tr>'; return; }
+  tbody.innerHTML = res.map((r, i) => {
+    let statusClass = 'res-pending', statusText = 'قيد الانتظار';
+    if (r.status === 'done') { statusClass = 'res-done'; statusText = 'تم التسليم'; }
+    else if (r.date === today) { statusClass = 'res-due'; statusText = 'اليوم!'; }
+    else if (r.date === tomorrow) { statusClass = 'res-due'; statusText = 'باكر!'; }
+    else if (r.date < today) { statusClass = 'res-due'; statusText = 'متأخر!'; }
+    return `<tr><td style="color:var(--text-muted)">${i + 1}</td><td style="font-weight:600">${r.customer}</td><td style="color:var(--text-muted)">${r.phone || '—'}</td><td style="font-size:0.82rem">${r.books.join('، ')}</td><td style="font-family:'Readex Pro'">${r.date}</td><td><span class="res-status ${statusClass}">${statusText}</span></td><td><div class="actions-cell">${r.status !== 'done' ? `<button class="btn btn-success btn-xs" onclick="completeReservation('${r.id}')">✅</button>` : ''}<button class="btn btn-danger btn-xs" onclick="deleteReservation('${r.id}')">🗑️</button></div></td></tr>`;
+  }).join('');
+}
+
+function completeReservation(id) {
+  const res = getReservations();
+  const r = res.find(x => x.id === id);
+  if (r) { r.status = 'done'; saveReservations(res); renderReservations(); showToast('تم تسليم الحجز'); }
+}
+
+function deleteReservation(id) {
+  if (!confirm('حذف هذا الحجز؟')) return;
+  saveReservations(getReservations().filter(r => r.id !== id));
+  renderReservations();
+  showToast('تم حذف الحجز');
+}
+
+function showDueReservations() {
+  const today = new Date().toISOString().slice(0, 10);
+  const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+  const due = getReservations().filter(r => r.status === 'pending' && (r.date === today || r.date === tomorrow));
+  let msg = '📅 الحجوزات المستحقة:\n\n';
+  due.forEach(r => { msg += `👤 ${r.customer}\n📚 ${r.books.join('، ')}\n📅 ${r.date}\n${r.phone ? '📞 ' + r.phone + '\n' : ''}━━━━━━━━\n`; });
+  alert(msg);
+}
+
+// ==================== EXPENSES ====================
+let _expenses = [];
+async function loadExpenses() {
+  try { const snap = await db.collection('expenses').get(); _expenses = snap.docs.map(d => ({ id: d.id, ...d.data() })); }
+  catch { _expenses = JSON.parse(localStorage.getItem('library_expenses') || '[]'); }
+}
+function getExpenses() { return _expenses; }
+async function saveExpenses(exp) {
+  _expenses = exp;
+  localStorage.setItem('library_expenses', JSON.stringify(exp));
+  try {
+    const batch = db.batch();
+    const existing = await db.collection('expenses').get();
+    existing.docs.forEach(d => batch.delete(d.ref));
+    exp.forEach(e => { const { id, ...data } = e; batch.set(db.collection('expenses').doc(id), data); });
+    await batch.commit();
+  } catch (e) { console.error('Save expenses error:', e); }
+}
+
+function addExpense(type) {
+  const isPromo = type === 'promo';
+  const desc = document.getElementById(isPromo ? 'promoDesc' : 'expDesc').value.trim();
+  const amount = parseFloat(document.getElementById(isPromo ? 'promoAmount' : 'expAmount').value) || 0;
+  const date = document.getElementById(isPromo ? 'promoDate' : 'expDate').value || new Date().toISOString().slice(0, 10);
+  if (!desc || !amount) { showToast('يرجى إدخال الوصف والمبلغ', 'error'); return; }
+  const exp = getExpenses();
+  exp.push({ id: generateId(), type: isPromo ? 'promo' : 'expense', desc, amount, date });
+  saveExpenses(exp);
+  document.getElementById(isPromo ? 'promoDesc' : 'expDesc').value = '';
+  document.getElementById(isPromo ? 'promoAmount' : 'expAmount').value = '';
+  renderExpenses();
+  showToast(isPromo ? 'تم إضافة ترويج' : 'تم إضافة مصروف');
+}
+
+function renderExpenses() {
+  const exp = getExpenses().sort((a, b) => b.date.localeCompare(a.date));
+  const tbody = document.getElementById('expTableBody');
+  const totalExp = exp.filter(e => e.type === 'expense').reduce((s, e) => s + e.amount, 0);
+  const totalPromo = exp.filter(e => e.type === 'promo').reduce((s, e) => s + e.amount, 0);
+  document.getElementById('expTotalExpenses').textContent = formatNum(totalExp);
+  document.getElementById('expTotalPromo').textContent = formatNum(totalPromo);
+  document.getElementById('expTotalAll').textContent = formatNum(totalExp + totalPromo);
+  if (!exp.length) { tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><div class="icon">💸</div><p>لا توجد مصروفات</p></div></td></tr>'; return; }
+  tbody.innerHTML = exp.map((e, i) => `<tr><td style="color:var(--text-muted)">${i + 1}</td><td><span style="padding:3px 8px;border-radius:6px;font-size:0.78rem;font-weight:600;${e.type === 'promo' ? 'background:var(--info-bg);color:var(--info)' : 'background:var(--danger-bg);color:var(--danger)'}">${e.type === 'promo' ? '📢 ترويج' : '💸 مصروف'}</span></td><td style="font-weight:600">${e.desc}</td><td class="price" style="color:var(--danger)">${formatNum(e.amount)} د.ع</td><td style="color:var(--text-muted);font-size:0.85rem">${e.date}</td><td><button class="btn btn-danger btn-xs" onclick="deleteExpense('${e.id}')">🗑️</button></td></tr>`).join('');
+}
+
+function deleteExpense(id) {
+  if (!confirm('حذف؟')) return;
+  saveExpenses(getExpenses().filter(e => e.id !== id));
+  renderExpenses();
+  showToast('تم الحذف');
 }
 
 // ==================== SETTINGS ====================
