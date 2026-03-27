@@ -578,18 +578,109 @@ body.light-mode .nav{background:rgba(255,255,255,0.95)}
 <div class="toast-container" id="toastContainer"></div>
 
 <!-- PIN Modal للمصروفات -->
-<div class="modal-overlay" id="pinModal" style="z-index:2000"><div class="modal" style="max-width:340px">
-  <div class="modal-header"><div class="modal-title">🔒 رمز الدخول - المصروفات</div></div>
-  <div class="modal-body" style="text-align:center">
-    <div style="font-size:2.5rem;margin-bottom:1rem">🔐</div>
-    <p style="color:var(--text-secondary);margin-bottom:1.2rem;font-size:0.9rem">هذا القسم محمي. أدخل رمز PIN للدخول.</p>
-    <input type="password" id="pinInput" class="form-input" placeholder="أدخل رمز PIN" maxlength="8" style="text-align:center;font-size:1.5rem;letter-spacing:6px;font-family:'Readex Pro',sans-serif" onkeydown="if(event.key==='Enter')checkPin()">
-    <div id="pinError" style="color:var(--danger);font-size:0.85rem;margin-top:8px;display:none">❌ رمز PIN غير صحيح</div>
+<div class="modal-overlay" id="pinModal" style="z-index:2000"><div class="modal" style="max-width:360px">
+
+  <!-- شاشة: إدخال الرمز -->
+  <div id="pinScreen-enter">
+    <div class="modal-header"><div class="modal-title">🔒 رمز الدخول - المصروفات</div></div>
+    <div class="modal-body" style="text-align:center">
+      <div style="font-size:2.5rem;margin-bottom:1rem">🔐</div>
+      <p style="color:var(--text-secondary);margin-bottom:1.2rem;font-size:0.9rem">هذا القسم محمي. أدخل رمز PIN للدخول.</p>
+      <input type="password" id="pinInput" class="form-input" placeholder="أدخل رمز PIN" maxlength="8" style="text-align:center;font-size:1.5rem;letter-spacing:6px;font-family:'Readex Pro',sans-serif" onkeydown="if(event.key==='Enter')checkPin()">
+      <div id="pinError" style="color:var(--danger);font-size:0.85rem;margin-top:8px;display:none">❌ رمز PIN غير صحيح</div>
+      <div style="margin-top:1rem">
+        <button class="btn btn-secondary" style="font-size:0.8rem;padding:6px 14px" onclick="pinShowScreen('change')">🔑 تغيير الرمز</button>
+        <button class="btn btn-secondary" style="font-size:0.8rem;padding:6px 14px;margin-right:8px" onclick="pinShowScreen('forgot')">❓ نسيت الرمز</button>
+      </div>
+    </div>
+    <div class="modal-footer" style="justify-content:center;gap:1rem">
+      <button class="btn btn-primary" onclick="checkPin()">🔓 دخول</button>
+      <button class="btn btn-secondary" onclick="closePinModal()">إلغاء</button>
+    </div>
   </div>
-  <div class="modal-footer" style="justify-content:center;gap:1rem">
-    <button class="btn btn-primary" onclick="checkPin()">🔓 دخول</button>
-    <button class="btn btn-secondary" onclick="closePinModal()">إلغاء</button>
+
+  <!-- شاشة: إنشاء رمز جديد (أول مرة) -->
+  <div id="pinScreen-create" style="display:none">
+    <div class="modal-header"><div class="modal-title">🆕 إنشاء رمز سري</div></div>
+    <div class="modal-body" style="text-align:center">
+      <div style="font-size:2.5rem;margin-bottom:1rem">🔏</div>
+      <p style="color:var(--text-secondary);margin-bottom:1.2rem;font-size:0.9rem">أنت تستخدم الرمز الافتراضي. أنشئ رمزك الخاص الآن.</p>
+      <div style="margin-bottom:12px">
+        <label style="display:block;font-size:0.85rem;font-weight:600;margin-bottom:6px;text-align:right">سؤال الأمان (لاسترداد الرمز لاحقاً)</label>
+        <select id="pinSecurityQ" class="form-input" style="font-size:0.9rem">
+          <option value="">-- اختر سؤالاً --</option>
+          <option value="اسم أمك قبل الزواج؟">اسم أمك قبل الزواج؟</option>
+          <option value="اسم مدرستك الابتدائية؟">اسم مدرستك الابتدائية؟</option>
+          <option value="اسم أول حيوان أليف لك؟">اسم أول حيوان أليف لك؟</option>
+          <option value="اسم مدينة ميلادك؟">اسم مدينة ميلادك؟</option>
+          <option value="اسم أفضل صديق لك في الطفولة؟">اسم أفضل صديق لك في الطفولة؟</option>
+        </select>
+      </div>
+      <div style="margin-bottom:12px">
+        <input type="text" id="pinSecurityA" class="form-input" placeholder="إجابة سؤال الأمان" style="font-size:0.9rem">
+      </div>
+      <div style="margin-bottom:12px">
+        <input type="password" id="pinCreate1" class="form-input" placeholder="رمز PIN الجديد" maxlength="8" style="text-align:center;font-size:1.3rem;letter-spacing:4px">
+      </div>
+      <input type="password" id="pinCreate2" class="form-input" placeholder="تأكيد رمز PIN" maxlength="8" style="text-align:center;font-size:1.3rem;letter-spacing:4px">
+      <div id="pinCreateError" style="color:var(--danger);font-size:0.85rem;margin-top:8px;display:none"></div>
+    </div>
+    <div class="modal-footer" style="justify-content:center;gap:1rem">
+      <button class="btn btn-primary" onclick="doCreatePin()">✅ حفظ الرمز</button>
+      <button class="btn btn-secondary" onclick="pinShowScreen('enter')">رجوع</button>
+    </div>
   </div>
+
+  <!-- شاشة: تغيير الرمز -->
+  <div id="pinScreen-change" style="display:none">
+    <div class="modal-header"><div class="modal-title">🔑 تغيير الرمز السري</div></div>
+    <div class="modal-body" style="text-align:center">
+      <div style="font-size:2.5rem;margin-bottom:1rem">🔄</div>
+      <div style="margin-bottom:12px">
+        <input type="password" id="pinChangeOld" class="form-input" placeholder="الرمز الحالي" maxlength="8" style="text-align:center;font-size:1.3rem;letter-spacing:4px">
+      </div>
+      <div style="margin-bottom:12px">
+        <input type="password" id="pinChangeNew1" class="form-input" placeholder="الرمز الجديد" maxlength="8" style="text-align:center;font-size:1.3rem;letter-spacing:4px">
+      </div>
+      <input type="password" id="pinChangeNew2" class="form-input" placeholder="تأكيد الرمز الجديد" maxlength="8" style="text-align:center;font-size:1.3rem;letter-spacing:4px">
+      <div id="pinChangeError" style="color:var(--danger);font-size:0.85rem;margin-top:8px;display:none"></div>
+      <div id="pinChangeSuccess" style="color:var(--success);font-size:0.85rem;margin-top:8px;display:none">✅ تم تغيير الرمز بنجاح!</div>
+    </div>
+    <div class="modal-footer" style="justify-content:center;gap:1rem">
+      <button class="btn btn-primary" onclick="doChangePin()">💾 تغيير</button>
+      <button class="btn btn-secondary" onclick="pinShowScreen('enter')">رجوع</button>
+    </div>
+  </div>
+
+  <!-- شاشة: نسيت الرمز -->
+  <div id="pinScreen-forgot" style="display:none">
+    <div class="modal-header"><div class="modal-title">❓ استرداد الرمز السري</div></div>
+    <div class="modal-body" style="text-align:center">
+      <div style="font-size:2.5rem;margin-bottom:1rem">🆘</div>
+      <div id="forgotQDiv">
+        <p style="color:var(--text-secondary);margin-bottom:1rem;font-size:0.9rem">أجب على سؤال الأمان لإعادة تعيين الرمز.</p>
+        <p id="forgotQText" style="font-weight:700;margin-bottom:12px;font-size:0.95rem"></p>
+        <input type="text" id="forgotAnswer" class="form-input" placeholder="إجابتك" style="font-size:0.9rem">
+        <div id="forgotError" style="color:var(--danger);font-size:0.85rem;margin-top:8px;display:none">❌ إجابة غير صحيحة</div>
+        <div class="modal-footer" style="justify-content:center;gap:1rem;margin-top:1rem;padding:0;border:none">
+          <button class="btn btn-primary" onclick="doForgotCheck()">تحقق</button>
+          <button class="btn btn-secondary" onclick="pinShowScreen('enter')">رجوع</button>
+        </div>
+      </div>
+      <div id="forgotResetDiv" style="display:none">
+        <p style="color:var(--success);margin-bottom:1rem;font-size:0.9rem">✅ صحيح! أدخل رمزاً جديداً.</p>
+        <div style="margin-bottom:12px">
+          <input type="password" id="forgotNew1" class="form-input" placeholder="الرمز الجديد" maxlength="8" style="text-align:center;font-size:1.3rem;letter-spacing:4px">
+        </div>
+        <input type="password" id="forgotNew2" class="form-input" placeholder="تأكيد الرمز الجديد" maxlength="8" style="text-align:center;font-size:1.3rem;letter-spacing:4px">
+        <div id="forgotResetError" style="color:var(--danger);font-size:0.85rem;margin-top:8px;display:none"></div>
+        <div class="modal-footer" style="justify-content:center;gap:1rem;margin-top:1rem;padding:0;border:none">
+          <button class="btn btn-primary" onclick="doForgotReset()">✅ حفظ</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div></div>
 
 <!-- Firebase SDK -->
@@ -1221,8 +1312,35 @@ function resetAllData(){
 }
 
 // ==================== PIN PROTECTION (EXPENSES) ====================
-const EXPENSES_PIN = '1234'; // غيّر هذا الرمز حسب رغبتك
+const DEFAULT_PIN = '1234';
 let _expensesUnlocked = false;
+
+// دوال الحفظ والاسترجاع من localStorage
+function getStoredPin() { return localStorage.getItem('expenses_pin') || DEFAULT_PIN; }
+function getSecurityQ() { return localStorage.getItem('expenses_security_q') || ''; }
+function getSecurityA() { return (localStorage.getItem('expenses_security_a') || '').toLowerCase().trim(); }
+function isPinCustomized() { return !!localStorage.getItem('expenses_pin'); }
+
+function pinShowScreen(screen) {
+  ['enter','create','change','forgot'].forEach(s => {
+    document.getElementById('pinScreen-' + s).style.display = s === screen ? '' : 'none';
+  });
+  // إعادة ضبط حقول الأخطاء
+  ['pinError','pinCreateError','pinChangeError','pinChangeSuccess','forgotError','forgotResetError'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.style.display = 'none';
+  });
+  if (screen === 'forgot') {
+    const q = getSecurityQ();
+    if (!q) {
+      document.getElementById('forgotQText').textContent = '';
+      document.getElementById('forgotQDiv').innerHTML = '<p style="color:var(--danger)">⚠️ لم يتم تعيين سؤال أمان. لا يمكن استرداد الرمز.</p><div class="modal-footer" style="justify-content:center;padding:0;border:none;margin-top:1rem"><button class="btn btn-secondary" onclick="pinShowScreen(\'enter\')">رجوع</button></div>';
+    } else {
+      document.getElementById('forgotQText').textContent = q;
+      document.getElementById('forgotQDiv').style.display = '';
+      document.getElementById('forgotResetDiv').style.display = 'none';
+    }
+  }
+}
 
 function requestPinForExpenses(event) {
   event.preventDefault();
@@ -1233,21 +1351,25 @@ function requestPinForExpenses(event) {
     document.getElementById('expensesNavBtn').classList.add('active');
     return;
   }
-  document.getElementById('pinInput').value = '';
-  document.getElementById('pinError').style.display = 'none';
   document.getElementById('pinModal').classList.add('active');
-  setTimeout(() => document.getElementById('pinInput').focus(), 150);
+  // إذا لم يتم تخصيص رمز بعد، اعرض شاشة الإنشاء
+  if (!isPinCustomized()) {
+    pinShowScreen('create');
+  } else {
+    pinShowScreen('enter');
+    document.getElementById('pinInput').value = '';
+    setTimeout(() => document.getElementById('pinInput').focus(), 150);
+  }
 }
 
 function checkPin() {
   const entered = document.getElementById('pinInput').value;
-  if (entered === EXPENSES_PIN) {
+  if (entered === getStoredPin()) {
     _expensesUnlocked = true;
     document.getElementById('pinModal').classList.remove('active');
     showPage('expenses');
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     document.getElementById('expensesNavBtn').classList.add('active');
-    // قفل تلقائي بعد 10 دقائق
     setTimeout(() => { _expensesUnlocked = false; }, 10 * 60 * 1000);
   } else {
     document.getElementById('pinError').style.display = 'block';
@@ -1255,6 +1377,63 @@ function checkPin() {
     document.getElementById('pinInput').focus();
     setTimeout(() => { document.getElementById('pinError').style.display = 'none'; }, 2500);
   }
+}
+
+function doCreatePin() {
+  const q = document.getElementById('pinSecurityQ').value.trim();
+  const a = document.getElementById('pinSecurityA').value.trim();
+  const p1 = document.getElementById('pinCreate1').value;
+  const p2 = document.getElementById('pinCreate2').value;
+  const err = document.getElementById('pinCreateError');
+  if (!q) { err.textContent = '⚠️ اختر سؤال الأمان'; err.style.display = 'block'; return; }
+  if (!a) { err.textContent = '⚠️ أدخل إجابة سؤال الأمان'; err.style.display = 'block'; return; }
+  if (p1.length < 4) { err.textContent = '⚠️ الرمز يجب أن يكون 4 أحرف على الأقل'; err.style.display = 'block'; return; }
+  if (p1 !== p2) { err.textContent = '⚠️ الرمزان غير متطابقين'; err.style.display = 'block'; return; }
+  localStorage.setItem('expenses_pin', p1);
+  localStorage.setItem('expenses_security_q', q);
+  localStorage.setItem('expenses_security_a', a.toLowerCase().trim());
+  showToast('✅ تم حفظ الرمز السري بنجاح!', 'success');
+  pinShowScreen('enter');
+  document.getElementById('pinInput').value = '';
+  setTimeout(() => document.getElementById('pinInput').focus(), 150);
+}
+
+function doChangePin() {
+  const oldP = document.getElementById('pinChangeOld').value;
+  const n1 = document.getElementById('pinChangeNew1').value;
+  const n2 = document.getElementById('pinChangeNew2').value;
+  const err = document.getElementById('pinChangeError');
+  const ok = document.getElementById('pinChangeSuccess');
+  err.style.display = 'none'; ok.style.display = 'none';
+  if (oldP !== getStoredPin()) { err.textContent = '❌ الرمز الحالي غير صحيح'; err.style.display = 'block'; return; }
+  if (n1.length < 4) { err.textContent = '⚠️ الرمز الجديد يجب أن يكون 4 أحرف على الأقل'; err.style.display = 'block'; return; }
+  if (n1 !== n2) { err.textContent = '⚠️ الرمزان الجديدان غير متطابقين'; err.style.display = 'block'; return; }
+  localStorage.setItem('expenses_pin', n1);
+  ok.style.display = 'block';
+  ['pinChangeOld','pinChangeNew1','pinChangeNew2'].forEach(id => document.getElementById(id).value = '');
+  setTimeout(() => pinShowScreen('enter'), 1500);
+}
+
+function doForgotCheck() {
+  const ans = document.getElementById('forgotAnswer').value.toLowerCase().trim();
+  if (ans === getSecurityA()) {
+    document.getElementById('forgotQDiv').style.display = 'none';
+    document.getElementById('forgotResetDiv').style.display = '';
+  } else {
+    document.getElementById('forgotError').style.display = 'block';
+    setTimeout(() => { document.getElementById('forgotError').style.display = 'none'; }, 2500);
+  }
+}
+
+function doForgotReset() {
+  const n1 = document.getElementById('forgotNew1').value;
+  const n2 = document.getElementById('forgotNew2').value;
+  const err = document.getElementById('forgotResetError');
+  if (n1.length < 4) { err.textContent = '⚠️ الرمز يجب أن يكون 4 أحرف على الأقل'; err.style.display = 'block'; return; }
+  if (n1 !== n2) { err.textContent = '⚠️ الرمزان غير متطابقين'; err.style.display = 'block'; return; }
+  localStorage.setItem('expenses_pin', n1);
+  showToast('✅ تم تعيين الرمز الجديد بنجاح!', 'success');
+  document.getElementById('pinModal').classList.remove('active');
 }
 
 function closePinModal() {
