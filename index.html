@@ -344,7 +344,16 @@ body.light-mode .nav{background:rgba(255,255,255,0.95)}
       <div class="stat-card"><div class="stat-card-icon">📚</div><div class="stat-card-value" id="statTotalCopies">0</div><div class="stat-card-label">إجمالي النسخ</div></div>
       <div class="stat-card sales"><div class="stat-card-icon">💰</div><div class="stat-card-value" id="statStockValue">0</div><div class="stat-card-label">قيمة المخزون</div></div>
       <div class="stat-card profit"><div class="stat-card-icon">📈</div><div class="stat-card-value" id="statExpectedProfit">0</div><div class="stat-card-label">الربح المتوقع</div></div>
-      <div class="stat-card" style="border-color:rgba(167,139,250,0.3)"><div class="stat-card-icon">🗓️</div><div class="stat-card-value" id="statDailyProfit" style="color:var(--purple)">0</div><div class="stat-card-label" style="color:var(--purple)">الربح اليومي الصافي</div></div>
+      <div class="stat-card" style="border-color:rgba(167,139,250,0.3);cursor:pointer;position:relative" onclick="toggleDailyProfitPicker()" title="انقر لاختيار تاريخ">
+        <div class="stat-card-icon">🗓️</div>
+        <div class="stat-card-value" id="statDailyProfit" style="color:var(--purple)">0</div>
+        <div class="stat-card-label" style="color:var(--purple)">الربح اليومي الصافي <span id="dailyProfitDateLabel" style="font-size:0.7rem;opacity:0.75;display:block"></span></div>
+        <div id="dailyProfitPicker" style="display:none;position:absolute;top:100%;right:0;z-index:999;background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:10px;box-shadow:0 8px 24px rgba(0,0,0,0.3);min-width:200px;margin-top:6px" onclick="event.stopPropagation()">
+          <div style="font-size:0.8rem;font-weight:700;margin-bottom:8px;color:var(--text-secondary)">📅 اختر تاريخاً</div>
+          <input type="date" id="dailyProfitDateInput" class="form-input" style="font-size:0.85rem;padding:6px 10px" onchange="applyDailyProfitDate()">
+          <button class="btn btn-secondary" style="width:100%;margin-top:8px;font-size:0.8rem;padding:5px" onclick="resetDailyProfitToToday()">🔄 اليوم</button>
+        </div>
+      </div>
     </div>
     <div class="toolbar">
       <div class="search-box"><span class="search-icon">🔍</span><input type="text" id="searchInput" placeholder="ابحث عن كتاب..." oninput="filterBooks()"></div>
@@ -1441,29 +1450,64 @@ function closePinModal() {
 }
 
 // ==================== DAILY PROFIT ====================
-function getDailyProfit() {
-  const today = new Date().toISOString().slice(0, 10);
+// التاريخ المختار للربح اليومي (null = اليوم)
+let _dailyProfitDate = null;
+
+function getDailyProfit(dateStr) {
+  const target = dateStr || new Date().toISOString().slice(0, 10);
   const sales = getSales();
   const expenses = getExpenses();
 
-  // ربح اليوم الخام من المبيعات
-  const todaySales = sales.filter(s => s.date && s.date.slice(0, 10) === today);
-  const rawProfit = todaySales.reduce((sum, s) => sum + (s.profit || 0), 0);
+  const daySales = sales.filter(s => s.date && s.date.slice(0, 10) === target);
+  const rawProfit = daySales.reduce((sum, s) => sum + (s.profit || 0), 0);
 
-  // مصروفات اليوم
-  const todayExpenses = expenses.filter(e => e.type === 'expense' && e.date === today)
+  const dayExpenses = expenses.filter(e => e.type === 'expense' && e.date === target)
     .reduce((sum, e) => sum + e.amount, 0);
 
-  // ترويج اليوم
-  const todayPromo = expenses.filter(e => e.type === 'promo' && e.date === today)
+  const dayPromo = expenses.filter(e => e.type === 'promo' && e.date === target)
     .reduce((sum, e) => sum + e.amount, 0);
 
-  // خصم 10% كنسبة الرواجع
   const returnsDeduction = rawProfit * 0.10;
-
-  const netProfit = rawProfit - todayExpenses - todayPromo - returnsDeduction;
+  const netProfit = rawProfit - dayExpenses - dayPromo - returnsDeduction;
   return Math.round(netProfit);
 }
+
+function toggleDailyProfitPicker() {
+  const picker = document.getElementById('dailyProfitPicker');
+  if (!picker) return;
+  const isOpen = picker.style.display !== 'none';
+  picker.style.display = isOpen ? 'none' : '';
+  if (!isOpen) {
+    const inp = document.getElementById('dailyProfitDateInput');
+    inp.value = _dailyProfitDate || new Date().toISOString().slice(0, 10);
+    inp.max = new Date().toISOString().slice(0, 10);
+  }
+}
+
+function applyDailyProfitDate() {
+  const val = document.getElementById('dailyProfitDateInput').value;
+  if (!val) return;
+  _dailyProfitDate = val;
+  document.getElementById('dailyProfitPicker').style.display = 'none';
+  updateDailyProfitStat();
+}
+
+function resetDailyProfitToToday() {
+  _dailyProfitDate = null;
+  document.getElementById('dailyProfitPicker').style.display = 'none';
+  updateDailyProfitStat();
+}
+
+// إغلاق التقويم عند الضغط خارجه
+document.addEventListener('click', function(e) {
+  const picker = document.getElementById('dailyProfitPicker');
+  if (picker && picker.style.display !== 'none') {
+    const card = picker.closest('.stat-card');
+    if (card && !card.contains(e.target)) {
+      picker.style.display = 'none';
+    }
+  }
+});
 
 // ==================== AUTO REFRESH (15 seconds countdown) ====================
 let _countdownVal = 15;
@@ -1522,9 +1566,18 @@ async function silentRefresh() {
 }
 
 function updateDailyProfitStat() {
-  const dp = getDailyProfit();
+  const dp = getDailyProfit(_dailyProfitDate);
   const el = document.getElementById('statDailyProfit');
   if (el) el.textContent = formatNum(dp);
+  const lbl = document.getElementById('dailyProfitDateLabel');
+  if (lbl) {
+    if (_dailyProfitDate) {
+      const d = new Date(_dailyProfitDate);
+      lbl.textContent = d.toLocaleDateString('ar-IQ', {year:'numeric',month:'short',day:'numeric'});
+    } else {
+      lbl.textContent = 'اليوم';
+    }
+  }
 }
 
 // ==================== INIT ====================
