@@ -316,6 +316,11 @@ body.light-mode .nav{background:rgba(255,255,255,0.95)}
     <div class="header-stat"><div class="header-stat-value" id="headerTotal">0</div><div class="header-stat-label">إجمالي الكتب</div></div>
     <div class="header-stat"><div class="header-stat-value" id="headerValue">0</div><div class="header-stat-label">قيمة المخزون</div></div>
     <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn" title="تغيير الوضع">🌙</button>
+    <div id="refreshCountdown" style="display:flex;align-items:center;gap:6px;background:var(--bg-card);border:1px solid var(--border);border-radius:20px;padding:6px 12px;font-size:0.78rem;color:var(--text-muted);cursor:default" title="تحديث تلقائي">
+      <span>🔄</span>
+      <span id="countdownNum" style="font-family:'Readex Pro',sans-serif;font-weight:700;color:var(--accent)">15</span>
+      <span>ث</span>
+    </div>
   </div>
 </div>
 
@@ -324,7 +329,7 @@ body.light-mode .nav{background:rgba(255,255,255,0.95)}
   <button class="nav-btn" data-page="add"><span class="icon">➕</span> إضافة كتاب</button>
   <button class="nav-btn" data-page="sell"><span class="icon">🧾</span> نقطة البيع</button>
   <button class="nav-btn" data-page="reservations"><span class="icon">📅</span> الحجوزات</button>
-  <button class="nav-btn" data-page="expenses"><span class="icon">💸</span> المصروفات</button>
+  <button class="nav-btn" data-page="expenses" id="expensesNavBtn" onclick="requestPinForExpenses(event)"><span class="icon">💸</span> المصروفات</button>
   <button class="nav-btn" data-page="sales"><span class="icon">💰</span> المبيعات</button>
   <button class="nav-btn" data-page="reports"><span class="icon">📊</span> التقارير</button>
   <button class="nav-btn" data-page="settings"><span class="icon">⚙️</span> الإعدادات</button>
@@ -339,6 +344,7 @@ body.light-mode .nav{background:rgba(255,255,255,0.95)}
       <div class="stat-card"><div class="stat-card-icon">📚</div><div class="stat-card-value" id="statTotalCopies">0</div><div class="stat-card-label">إجمالي النسخ</div></div>
       <div class="stat-card sales"><div class="stat-card-icon">💰</div><div class="stat-card-value" id="statStockValue">0</div><div class="stat-card-label">قيمة المخزون</div></div>
       <div class="stat-card profit"><div class="stat-card-icon">📈</div><div class="stat-card-value" id="statExpectedProfit">0</div><div class="stat-card-label">الربح المتوقع</div></div>
+      <div class="stat-card" style="border-color:rgba(167,139,250,0.3)"><div class="stat-card-icon">🗓️</div><div class="stat-card-value" id="statDailyProfit" style="color:var(--purple)">0</div><div class="stat-card-label" style="color:var(--purple)">الربح اليومي الصافي</div></div>
     </div>
     <div class="toolbar">
       <div class="search-box"><span class="search-icon">🔍</span><input type="text" id="searchInput" placeholder="ابحث عن كتاب..." oninput="filterBooks()"></div>
@@ -571,6 +577,21 @@ body.light-mode .nav{background:rgba(255,255,255,0.95)}
 
 <div class="toast-container" id="toastContainer"></div>
 
+<!-- PIN Modal للمصروفات -->
+<div class="modal-overlay" id="pinModal" style="z-index:2000"><div class="modal" style="max-width:340px">
+  <div class="modal-header"><div class="modal-title">🔒 رمز الدخول - المصروفات</div></div>
+  <div class="modal-body" style="text-align:center">
+    <div style="font-size:2.5rem;margin-bottom:1rem">🔐</div>
+    <p style="color:var(--text-secondary);margin-bottom:1.2rem;font-size:0.9rem">هذا القسم محمي. أدخل رمز PIN للدخول.</p>
+    <input type="password" id="pinInput" class="form-input" placeholder="أدخل رمز PIN" maxlength="8" style="text-align:center;font-size:1.5rem;letter-spacing:6px;font-family:'Readex Pro',sans-serif" onkeydown="if(event.key==='Enter')checkPin()">
+    <div id="pinError" style="color:var(--danger);font-size:0.85rem;margin-top:8px;display:none">❌ رمز PIN غير صحيح</div>
+  </div>
+  <div class="modal-footer" style="justify-content:center;gap:1rem">
+    <button class="btn btn-primary" onclick="checkPin()">🔓 دخول</button>
+    <button class="btn btn-secondary" onclick="closePinModal()">إلغاء</button>
+  </div>
+</div></div>
+
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -725,7 +746,7 @@ function renderBooks(){
 function getFilteredBooks(){let books=getBooks();const s=document.getElementById('searchInput').value.trim().toLowerCase(),cat=document.getElementById('categoryFilter').value,st=document.getElementById('stockFilter').value;if(s)books=books.filter(b=>b.title.toLowerCase().includes(s)||(b.author&&b.author.toLowerCase().includes(s))||(b.isbn&&b.isbn.includes(s)));if(cat)books=books.filter(b=>b.category===cat);if(st==='ok')books=books.filter(b=>b.quantity>3);if(st==='low')books=books.filter(b=>b.quantity>0&&b.quantity<=3);if(st==='out')books=books.filter(b=>b.quantity===0);return books}
 function filterBooks(){currentBookPage=1;renderBooks()}
 function deleteBook(id){if(!confirm('حذف هذا الكتاب؟'))return;saveBooks(getBooks().filter(b=>b.id!==id));renderBooks();updateCategoryFilter();updateHeaderStats();showToast('تم الحذف')}
-function updateStats(books){document.getElementById('statTotalBooks').textContent=formatNum(books.length);document.getElementById('statTotalCopies').textContent=formatNum(books.reduce((s,b)=>s+b.quantity,0));document.getElementById('statStockValue').textContent=formatNum(books.reduce((s,b)=>s+(b.buyPrice*b.quantity),0));document.getElementById('statExpectedProfit').textContent=formatNum(books.reduce((s,b)=>s+((b.sellPrice-b.buyPrice)*b.quantity),0))}
+function updateStats(books){document.getElementById('statTotalBooks').textContent=formatNum(books.length);document.getElementById('statTotalCopies').textContent=formatNum(books.reduce((s,b)=>s+b.quantity,0));document.getElementById('statStockValue').textContent=formatNum(books.reduce((s,b)=>s+(b.buyPrice*b.quantity),0));document.getElementById('statExpectedProfit').textContent=formatNum(books.reduce((s,b)=>s+((b.sellPrice-b.buyPrice)*b.quantity),0));updateDailyProfitStat();}
 function updateHeaderStats(){const books=getBooks();document.getElementById('headerTotal').textContent=formatNum(books.length);document.getElementById('headerValue').textContent=formatNum(books.reduce((s,b)=>s+(b.buyPrice*b.quantity),0))}
 function updateCategoryFilter(){const cats=[...new Set(getBooks().map(b=>b.category).filter(Boolean))].sort(),sel=document.getElementById('categoryFilter'),cur=sel.value;sel.innerHTML='<option value="">كل الأقسام</option>'+cats.map(c=>`<option value="${c}">${c}</option>`).join('');if(cats.includes(cur))sel.value=cur;document.getElementById('categoryList').innerHTML=cats.map(c=>`<option value="${c}">`).join('')}
 
@@ -1199,6 +1220,134 @@ function resetAllData(){
   location.reload();
 }
 
+// ==================== PIN PROTECTION (EXPENSES) ====================
+const EXPENSES_PIN = '1234'; // غيّر هذا الرمز حسب رغبتك
+let _expensesUnlocked = false;
+
+function requestPinForExpenses(event) {
+  event.preventDefault();
+  event.stopPropagation();
+  if (_expensesUnlocked) {
+    showPage('expenses');
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('expensesNavBtn').classList.add('active');
+    return;
+  }
+  document.getElementById('pinInput').value = '';
+  document.getElementById('pinError').style.display = 'none';
+  document.getElementById('pinModal').classList.add('active');
+  setTimeout(() => document.getElementById('pinInput').focus(), 150);
+}
+
+function checkPin() {
+  const entered = document.getElementById('pinInput').value;
+  if (entered === EXPENSES_PIN) {
+    _expensesUnlocked = true;
+    document.getElementById('pinModal').classList.remove('active');
+    showPage('expenses');
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('expensesNavBtn').classList.add('active');
+    // قفل تلقائي بعد 10 دقائق
+    setTimeout(() => { _expensesUnlocked = false; }, 10 * 60 * 1000);
+  } else {
+    document.getElementById('pinError').style.display = 'block';
+    document.getElementById('pinInput').value = '';
+    document.getElementById('pinInput').focus();
+    setTimeout(() => { document.getElementById('pinError').style.display = 'none'; }, 2500);
+  }
+}
+
+function closePinModal() {
+  document.getElementById('pinModal').classList.remove('active');
+}
+
+// ==================== DAILY PROFIT ====================
+function getDailyProfit() {
+  const today = new Date().toISOString().slice(0, 10);
+  const sales = getSales();
+  const expenses = getExpenses();
+
+  // ربح اليوم الخام من المبيعات
+  const todaySales = sales.filter(s => s.date && s.date.slice(0, 10) === today);
+  const rawProfit = todaySales.reduce((sum, s) => sum + (s.profit || 0), 0);
+
+  // مصروفات اليوم
+  const todayExpenses = expenses.filter(e => e.type === 'expense' && e.date === today)
+    .reduce((sum, e) => sum + e.amount, 0);
+
+  // ترويج اليوم
+  const todayPromo = expenses.filter(e => e.type === 'promo' && e.date === today)
+    .reduce((sum, e) => sum + e.amount, 0);
+
+  // خصم 10% كنسبة الرواجع
+  const returnsDeduction = rawProfit * 0.10;
+
+  const netProfit = rawProfit - todayExpenses - todayPromo - returnsDeduction;
+  return Math.round(netProfit);
+}
+
+// ==================== AUTO REFRESH (15 seconds countdown) ====================
+let _countdownVal = 15;
+let _countdownInterval = null;
+
+function startAutoRefresh() {
+  if (_countdownInterval) clearInterval(_countdownInterval);
+  _countdownVal = 15;
+  updateCountdownDisplay();
+
+  _countdownInterval = setInterval(() => {
+    _countdownVal--;
+    updateCountdownDisplay();
+    if (_countdownVal <= 0) {
+      _countdownVal = 15;
+      // تحديث البيانات بدون إعادة تحميل الصفحة
+      silentRefresh();
+    }
+  }, 1000);
+}
+
+function updateCountdownDisplay() {
+  const el = document.getElementById('countdownNum');
+  if (el) el.textContent = _countdownVal;
+}
+
+async function silentRefresh() {
+  try {
+    const [booksSnap, salesSnap, expSnap, resSnap] = await Promise.all([
+      db.collection('books').get(),
+      db.collection('sales').get(),
+      db.collection('expenses').get(),
+      db.collection('reservations').get()
+    ]);
+    _books = booksSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    _sales = salesSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    _expenses = expSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    _reservations = resSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    // تحديث ما هو ظاهر حالياً
+    const activePage = document.querySelector('.page.active');
+    if (activePage) {
+      const pageId = activePage.id.replace('page-', '');
+      if (pageId === 'books') renderBooks();
+      else if (pageId === 'sell') renderPosBooks();
+      else if (pageId === 'sales') renderSales();
+      else if (pageId === 'expenses') renderExpenses();
+      else if (pageId === 'reports') renderReports();
+      else if (pageId === 'reservations') renderReservations();
+    }
+    updateHeaderStats();
+    updateDailyProfitStat();
+  } catch(e) {
+    // صامت - لا يظهر خطأ للمستخدم
+  }
+}
+
+function updateDailyProfitStat() {
+  const dp = getDailyProfit();
+  const el = document.getElementById('statDailyProfit');
+  if (el) el.textContent = formatNum(dp);
+}
+
 // ==================== INIT ====================
 async function init(){
   await loadAllData();
@@ -1212,6 +1361,8 @@ async function init(){
   }
   if(!getSettings().storeName)await saveSettingsData({storeName:'',phone:'',address:'',logo:'📚',footer:'شكراً لزيارتكم!'});
   updateCategoryFilter();renderBooks();renderCustomFieldsList();renderAddCustomFields();updateHeaderStats();
+  updateDailyProfitStat();
+  startAutoRefresh();
 }
 init();
 </script>
