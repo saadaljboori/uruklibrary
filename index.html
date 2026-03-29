@@ -1387,7 +1387,7 @@ function closePinModal() {
 // --- إعداد EmailJS ---
 // ضع بيانات حسابك في EmailJS هنا:
 const EMAILJS_PUBLIC_KEY  = 'bhxZKxg7AUhpZGOF2';
-const EMAILJS_SERVICE_ID  = 'saadaljboori';
+const EMAILJS_SERVICE_ID  = 'service_hv9aq29';
 const EMAILJS_TEMPLATE_ID = 'template_llet73l';
 const OWNER_EMAIL         = 'Saadaljboori1995@gmail.com'; // إيميلك الشخصي
 
@@ -1453,7 +1453,8 @@ async function sendRecoveryCode() {
     document.getElementById('recoveryStep2Error').style.display = 'none';
     setTimeout(() => document.getElementById('recoveryCode').focus(), 100);
   } catch(e) {
-    errEl.textContent = '❌ فشل الإرسال. تحقق من إعداد EmailJS.';
+    const errMsg = e?.text || e?.message || JSON.stringify(e) || 'unknown error';
+    errEl.textContent = '❌ فشل الإرسال: ' + errMsg;
     errEl.style.display = 'block';
     _recoveryCode = null;
     console.error('EmailJS error:', e);
