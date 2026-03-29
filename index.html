@@ -734,9 +734,18 @@ const db = firebase.firestore();
 let _books = [], _sales = [], _fields = [], _settings = {}, _dataLoaded = false;
 
 async function loadAllData() {
-  // timeout بعد 5 ثواني يستخدم البيانات المحلية
-  const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000));
+  // أولاً: حمّل البيانات المحلية فوراً بدون انتظار
+  _books = JSON.parse(localStorage.getItem('library_books') || '[]');
+  _sales = JSON.parse(localStorage.getItem('library_sales') || '[]');
+  _fields = JSON.parse(localStorage.getItem('library_custom_fields') || '[]');
+  _settings = JSON.parse(localStorage.getItem('library_settings') || '{}');
+  _reservations = JSON.parse(localStorage.getItem('library_reservations') || '[]');
+  _expenses = JSON.parse(localStorage.getItem('library_expenses') || '[]');
+  _dataLoaded = true;
+
+  // ثانياً: حدّث من Firebase في الخلفية بدون إيقاف الواجهة
   try {
+    const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 8000));
     const [booksSnap, salesSnap, fieldsSnap, settingsSnap, resSnap, expSnap] = await Promise.race([
       Promise.all([
         db.collection('books').get(),
@@ -754,16 +763,10 @@ async function loadAllData() {
     _settings = settingsSnap.exists ? settingsSnap.data() : {};
     _reservations = resSnap.docs.map(d => ({ id: d.id, ...d.data() }));
     _expenses = expSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-    _dataLoaded = true;
+    // حدّث الواجهة بعد وصول بيانات Firebase
+    renderBooks(); updateHeaderStats(); updateDailyProfitStat();
   } catch (e) {
-    console.error('Firebase load error:', e);
-    _books = JSON.parse(localStorage.getItem('library_books') || '[]');
-    _sales = JSON.parse(localStorage.getItem('library_sales') || '[]');
-    _fields = JSON.parse(localStorage.getItem('library_custom_fields') || '[]');
-    _settings = JSON.parse(localStorage.getItem('library_settings') || '{}');
-    _reservations = JSON.parse(localStorage.getItem('library_reservations') || '[]');
-    _expenses = JSON.parse(localStorage.getItem('library_expenses') || '[]');
-    _dataLoaded = true;
+    console.error('Firebase sync error:', e);
   }
 }
 
@@ -1666,22 +1669,27 @@ function updateDailyProfitStat() {
 
 // ==================== INIT ====================
 async function init(){
-  await loadAllData();
-  if(!getBooks().length){
-    const initialized=localStorage.getItem('library_initialized');
-    if(!initialized){
-      const samples=[{title:'ألف ليلة وليلة',author:'مجهول',category:'أدب كلاسيكي',buyPrice:15000,sellPrice:25000,quantity:8},{title:'مقدمة ابن خلدون',author:'ابن خلدون',category:'تاريخ',buyPrice:20000,sellPrice:35000,quantity:5},{title:'النبي',author:'جبران خليل جبران',category:'أدب',buyPrice:8000,sellPrice:15000,quantity:12},{title:'طوق الحمامة',author:'ابن حزم',category:'أدب كلاسيكي',buyPrice:12000,sellPrice:20000,quantity:3},{title:'رجال في الشمس',author:'غسان كنفاني',category:'روايات',buyPrice:10000,sellPrice:18000,quantity:7},{title:'البخلاء',author:'الجاحظ',category:'أدب كلاسيكي',buyPrice:14000,sellPrice:22000,quantity:6},{title:'الأيام',author:'طه حسين',category:'سيرة ذاتية',buyPrice:11000,sellPrice:19000,quantity:4},{title:'في الطريق',author:'نجيب محفوظ',category:'روايات',buyPrice:9000,sellPrice:16000,quantity:10},{title:'تعلم البرمجة',author:'أحمد المبرمج',category:'تقنية',buyPrice:25000,sellPrice:40000,quantity:2},{title:'أساسيات الفيزياء',author:'فريدريك بوش',category:'علوم',buyPrice:30000,sellPrice:45000,quantity:1}];
-      await saveBooks(samples.map(s=>({...s,id:generateId(),isbn:'',notes:'',customFields:{},dateAdded:new Date().toISOString(),totalSold:0})));
-      localStorage.setItem('library_initialized','yes');
-    }
-  }
-  if(!getSettings().storeName)await saveSettingsData({storeName:'',phone:'',address:'',logo:'📚',footer:'شكراً لزيارتكم!'});
+  // افتح الواجهة فوراً من البيانات المحلية
+  _books = JSON.parse(localStorage.getItem('library_books') || '[]');
+  _sales = JSON.parse(localStorage.getItem('library_sales') || '[]');
+  _fields = JSON.parse(localStorage.getItem('library_custom_fields') || '[]');
+  _settings = JSON.parse(localStorage.getItem('library_settings') || '{}');
+  _reservations = JSON.parse(localStorage.getItem('library_reservations') || '[]');
+  _expenses = JSON.parse(localStorage.getItem('library_expenses') || '[]');
+  _dataLoaded = true;
+
+  if(!getSettings().storeName) _settings = {storeName:'',phone:'',address:'',logo:'📚',footer:'شكراً لزيارتكم!'};
+
   updateCategoryFilter();renderBooks();renderCustomFieldsList();renderAddCustomFields();updateHeaderStats();
   updateDailyProfitStat();
-  startAutoRefresh();
-  // إخفاء شاشة التحميل
+
+  // أخفِ شاشة التحميل فوراً
   const ls = document.getElementById('loadingScreen');
-  if(ls){ ls.style.opacity='0'; ls.style.transition='opacity 0.4s'; setTimeout(()=>ls.remove(),400); }
+  if(ls){ ls.style.opacity='0'; ls.style.transition='opacity 0.3s'; setTimeout(()=>ls.remove(),300); }
+
+  // زامن مع Firebase في الخلفية
+  loadAllData();
+  startAutoRefresh();
 }
 init();
 </script>
