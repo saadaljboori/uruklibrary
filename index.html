@@ -734,15 +734,19 @@ const db = firebase.firestore();
 let _books = [], _sales = [], _fields = [], _settings = {}, _dataLoaded = false;
 
 async function loadAllData() {
-  showToast('جاري تحميل البيانات...', 'success');
+  // timeout بعد 5 ثواني يستخدم البيانات المحلية
+  const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000));
   try {
-    const [booksSnap, salesSnap, fieldsSnap, settingsSnap, resSnap, expSnap] = await Promise.all([
-      db.collection('books').get(),
-      db.collection('sales').get(),
-      db.collection('customFields').get(),
-      db.collection('settings').doc('main').get(),
-      db.collection('reservations').get(),
-      db.collection('expenses').get()
+    const [booksSnap, salesSnap, fieldsSnap, settingsSnap, resSnap, expSnap] = await Promise.race([
+      Promise.all([
+        db.collection('books').get(),
+        db.collection('sales').get(),
+        db.collection('customFields').get(),
+        db.collection('settings').doc('main').get(),
+        db.collection('reservations').get(),
+        db.collection('expenses').get()
+      ]),
+      timeout
     ]);
     _books = booksSnap.docs.map(d => ({ id: d.id, ...d.data() }));
     _sales = salesSnap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -751,10 +755,8 @@ async function loadAllData() {
     _reservations = resSnap.docs.map(d => ({ id: d.id, ...d.data() }));
     _expenses = expSnap.docs.map(d => ({ id: d.id, ...d.data() }));
     _dataLoaded = true;
-    showToast('تم تحميل البيانات ✅');
   } catch (e) {
     console.error('Firebase load error:', e);
-    showToast('خطأ بالاتصال - جاري استخدام البيانات المحلية', 'error');
     _books = JSON.parse(localStorage.getItem('library_books') || '[]');
     _sales = JSON.parse(localStorage.getItem('library_sales') || '[]');
     _fields = JSON.parse(localStorage.getItem('library_custom_fields') || '[]');
