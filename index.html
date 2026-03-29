@@ -227,176 +227,75 @@ body.light-mode .nav{background:rgba(255,255,255,0.95)}
 .theme-toggle:hover{border-color:var(--accent)}
 
 @media(max-width:768px){
-  /* === GLOBAL MOBILE === */
-  html{-webkit-text-size-adjust:100%}
-  body{-webkit-tap-highlight-color:transparent}
-  input,select,textarea,button{font-size:16px!important} /* prevent iOS zoom */
-
-  /* === HEADER === */
-  .header{padding:0 0.75rem;height:52px}
+  .header{padding:0 0.75rem;height:56px}
   .header-stats{display:none}
   .logo-text{font-size:1rem}
-  .logo-icon{width:32px;height:32px;border-radius:8px}
-
-  /* === NAV — scrollable bottom tab bar on mobile === */
-  .nav{
-    position:fixed!important;
-    bottom:0;left:0;right:0;
-    top:auto!important;
-    z-index:200;
-    padding:0;gap:0;
-    background:var(--bg-secondary);
-    border-top:1px solid var(--border);
-    border-bottom:none;
-    display:flex;
-    overflow-x:auto;
-    -webkit-overflow-scrolling:touch;
-    scrollbar-width:none;
-    box-shadow:0 -2px 16px rgba(0,0,0,0.3)
-  }
-  .nav::-webkit-scrollbar{display:none}
-  .nav-btn{
-    flex:0 0 auto;
-    flex-direction:column;
-    padding:8px 12px 6px;
-    font-size:0.65rem;
-    gap:2px;
-    border-bottom:none;
-    border-top:2px solid transparent;
-    min-width:64px;
-    text-align:center;
-    justify-content:center
-  }
-  .nav-btn.active{border-bottom:none;border-top-color:var(--accent)}
-  .nav-btn .icon{font-size:1.15rem;display:block}
-
-  /* === MAIN CONTENT — add bottom padding for fixed nav === */
-  .main{padding:0.75rem 0.75rem 80px}
-
-  /* === REFRESH COUNTDOWN — move above bottom nav === */
-  #refreshCountdown{bottom:72px!important;left:12px!important;padding:6px 12px!important;font-size:0.75rem!important}
-  #refreshCountdown #countdownNum{font-size:0.95rem!important}
-
-  /* === STATS GRID === */
+  .logo-icon{width:34px;height:34px}
+  .nav{padding:0;top:56px;gap:0}
+  .nav-btn{padding:10px 12px;font-size:0.78rem;gap:4px}
+  .nav-btn .icon{font-size:0.9rem}
+  .main{padding:0.75rem}
   .stats-grid{grid-template-columns:repeat(2,1fr);gap:0.5rem;margin-bottom:1rem}
-  .stat-card{padding:0.7rem}
-  .stat-card-value{font-size:1.2rem}
-  .stat-card-label{font-size:0.72rem}
-  .stat-card-icon{font-size:1.1rem;margin-bottom:0.25rem}
-
-  /* === TOOLBAR === */
+  .stat-card{padding:0.8rem}
+  .stat-card-value{font-size:1.3rem}
+  .stat-card-label{font-size:0.75rem}
+  .stat-card-icon{font-size:1.2rem;margin-bottom:0.3rem}
   .toolbar{flex-direction:column;gap:0.5rem;margin-bottom:1rem}
-  .search-box{min-width:100%;width:100%}
-  .search-box input{padding:12px 14px 12px 40px;font-size:0.9rem!important;border-radius:10px}
-  .filter-group{width:100%;flex-wrap:wrap}
-  .filter-group select{flex:1;padding:10px 12px;font-size:0.85rem!important;min-height:44px}
-
-  /* === BUTTONS — touch-friendly sizing === */
-  .btn{padding:10px 16px;font-size:0.85rem!important;min-height:44px;border-radius:10px}
-  .btn-sm{padding:8px 12px;font-size:0.78rem!important;min-height:38px}
-  .btn-xs{padding:6px 10px;font-size:0.72rem!important;min-height:34px}
-
-  /* === FORMS === */
+  .search-box{min-width:100%}
+  .search-box input{padding:10px 12px 10px 38px;font-size:0.85rem}
+  .filter-group{width:100%}
+  .filter-group select{flex:1;padding:8px 10px;font-size:0.82rem}
+  .btn{padding:8px 14px;font-size:0.82rem}
   .form-row{grid-template-columns:1fr}
-  .form-input{padding:12px 14px;font-size:0.95rem!important;min-height:44px;border-radius:10px}
-  .form-label{font-size:0.82rem;margin-bottom:6px}
-
-  /* === TABLES — horizontal scroll with touch === */
-  .table-container{border-radius:8px;overflow:hidden}
-  .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
-  table{min-width:580px}
-  thead th{padding:10px;font-size:0.75rem;position:sticky;top:0}
-  tbody td{padding:10px;font-size:0.82rem}
-  .actions-cell{gap:4px}
-  .book-title-cell{max-width:160px}
-
-  /* === REPORTS === */
+  .form-input{padding:8px 10px;font-size:0.88rem}
+  .form-label{font-size:0.8rem}
   .reports-grid{grid-template-columns:1fr}
-
-  /* === CUSTOM FIELDS === */
   .add-field-form{flex-direction:column}
-  .fields-manager-header{flex-direction:column;gap:8px;align-items:flex-start}
-
-  /* === POS — single column layout === */
+  .table-container{border-radius:8px}
+  table{min-width:600px}
+  thead th{padding:8px 10px;font-size:0.75rem}
+  tbody td{padding:8px 10px;font-size:0.8rem}
+  .actions-cell{gap:2px}
+  .btn-sm{padding:5px 8px;font-size:0.72rem}
+  /* POS mobile layout */
   #page-sell > h2 ~ div{grid-template-columns:1fr!important;gap:1rem}
   #page-expenses > .stats-grid ~ div{grid-template-columns:1fr!important;gap:1rem}
-  .cart-items{max-height:180px}
-  .cart-item{padding:8px 10px}
-  .cart-item-name{font-size:0.85rem}
-  .cart-item-price{font-size:0.85rem}
-  .cart-total{padding:12px;font-size:0.95rem}
-
-  /* === MODAL — full screen on mobile === */
-  .modal-overlay{padding:0;align-items:flex-end}
-  .modal{
-    max-width:100%!important;
-    max-height:92vh;
-    border-radius:16px 16px 0 0;
-    margin:0;
-    animation:modalSlideUp 0.3s ease
-  }
-  .modal.wide{max-width:100%!important}
-  @keyframes modalSlideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-  .modal-header{padding:1rem 1.2rem;position:sticky;top:0;background:var(--bg-secondary);z-index:5}
-  .modal-header::before{content:'';position:absolute;top:8px;left:50%;transform:translateX(-50%);width:36px;height:4px;border-radius:2px;background:var(--border-light)}
-  .modal-body{padding:1rem 1.2rem}
-  .modal-footer{padding:0.75rem 1.2rem;flex-wrap:wrap;gap:0.5rem;position:sticky;bottom:0;background:var(--bg-secondary);z-index:5}
-  .modal-footer .btn{flex:1;min-width:calc(50% - 0.5rem);justify-content:center}
-
-  /* === INVOICE MOBILE === */
-  .inv-header{flex-direction:column;gap:12px;padding:16px;align-items:flex-start}
-  .inv-store-info{width:100%}
+  .cart-items{max-height:150px}
+  .cart-item{padding:6px 8px}
+  .cart-item-name{font-size:0.8rem}
+  .cart-total{padding:10px;font-size:0.9rem}
+  /* Modal mobile */
+  .modal{max-width:100%;max-height:100vh;border-radius:8px;margin:0.5rem}
+  .modal.wide{max-width:100%}
+  .modal-header{padding:1rem}
+  .modal-body{padding:1rem}
+  .modal-footer{padding:0.75rem 1rem;flex-wrap:wrap;gap:0.5rem}
+  .modal-footer .btn{flex:1;min-width:calc(50% - 0.5rem);justify-content:center;font-size:0.8rem;padding:8px 10px}
+  /* Invoice mobile */
+  .inv-header{flex-direction:column;gap:12px;padding:16px}
   .inv-meta{flex-direction:column;gap:8px;padding:12px 16px}
   .inv-meta-item{display:flex;justify-content:space-between;text-align:right}
-  .inv-body{padding:12px 16px;overflow-x:auto;-webkit-overflow-scrolling:touch}
-  .inv-table{min-width:400px}
+  .inv-body{padding:12px 16px}
   .inv-table th{padding:6px 8px;font-size:0.72rem}
-  .inv-table td{padding:8px;font-size:0.8rem}
+  .inv-table td{padding:6px 8px;font-size:0.78rem}
   .inv-totals-box{min-width:100%;width:100%}
   .inv-footer{padding:12px 16px;font-size:0.75rem}
-  .inv-store-name{font-size:1.15rem}
-  .inv-logo{width:50px;height:50px;border-radius:10px}
-
-  /* === SETTINGS === */
+  .inv-store-name{font-size:1.2rem}
+  .inv-logo{width:55px;height:55px}
+  /* Settings mobile */
   .settings-section{padding:1rem}
-
-  /* === EMPTY STATE === */
+  /* Empty state */
   .empty-state{padding:2rem}
   .empty-state .icon{font-size:2rem}
   .empty-state p{font-size:0.85rem}
-
-  /* === PAGE TITLES === */
-  h2{font-size:1.05rem!important}
-
-  /* === SUGGESTIONS BOX === */
-  .suggestions-box{max-height:120px}
-  .suggestion-item{padding:10px 12px;font-size:0.9rem}
-
-  /* === TOAST === */
-  .toast-container{top:auto;bottom:80px;left:12px;right:12px;transform:none}
-  .toast{font-size:0.85rem;padding:10px 16px}
-
-  /* === PAGINATION === */
-  .pagination{flex-wrap:wrap;gap:4px;padding:0.75rem}
-  .page-btn{padding:8px 12px;min-width:38px;min-height:38px;display:flex;align-items:center;justify-content:center}
-  .page-info{font-size:0.78rem;width:100%;text-align:center;order:-1;margin-bottom:4px}
-
-  /* === STOCK & CATEGORY BADGES === */
-  .stock-badge{font-size:0.75rem;padding:4px 8px}
-  .category-tag{font-size:0.72rem;padding:3px 8px}
+  /* Page title */
+  h2{font-size:1.1rem!important}
 }
 
 @media(max-width:400px){
-  .nav-btn{padding:6px 8px 4px;font-size:0.6rem;min-width:56px}
-  .nav-btn .icon{font-size:1rem}
-  .stat-card-value{font-size:1rem}
+  .nav-btn{padding:8px 8px;font-size:0.7rem}
+  .stat-card-value{font-size:1.1rem}
   .stats-grid{gap:0.4rem}
-  .stat-card{padding:0.6rem}
-  .main{padding:0.5rem 0.5rem 80px}
-  .search-box input{padding:10px 12px 10px 36px}
-  table{min-width:500px}
-  .modal-body{padding:0.75rem 1rem}
-  h2{font-size:0.95rem!important}
 }
 
 @media print{
@@ -452,7 +351,6 @@ body.light-mode .nav{background:rgba(255,255,255,0.95)}
 #refreshIcon { animation: none; }
 #refreshCountdown.refreshing #refreshIcon { animation: spin 0.6s linear infinite; }
 </style>
-<div class="nav">
   <button class="nav-btn active" data-page="books"><span class="icon">📖</span> الكتب</button>
   <button class="nav-btn" data-page="add"><span class="icon">➕</span> إضافة كتاب</button>
   <button class="nav-btn" data-page="sell"><span class="icon">🧾</span> نقطة البيع</button>
