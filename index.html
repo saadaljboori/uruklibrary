@@ -1423,7 +1423,7 @@ async function sendRecoveryCode() {
     errEl.style.display = 'block';
     return;
   }
-  if (email !== OWNER_EMAIL) {
+  if (email.toLowerCase() !== OWNER_EMAIL.toLowerCase()) {
     errEl.textContent = '❌ هذا الإيميل غير مسجّل في النظام';
     errEl.style.display = 'block';
     return;
