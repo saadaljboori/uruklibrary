@@ -316,15 +316,41 @@ body.light-mode .nav{background:rgba(255,255,255,0.95)}
     <div class="header-stat"><div class="header-stat-value" id="headerTotal">0</div><div class="header-stat-label">إجمالي الكتب</div></div>
     <div class="header-stat"><div class="header-stat-value" id="headerValue">0</div><div class="header-stat-label">قيمة المخزون</div></div>
     <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn" title="تغيير الوضع">🌙</button>
-    <div id="refreshCountdown" style="display:flex;align-items:center;gap:6px;background:var(--bg-card);border:1px solid var(--border);border-radius:20px;padding:6px 12px;font-size:0.78rem;color:var(--text-muted);cursor:default" title="تحديث تلقائي">
-      <span>🔄</span>
-      <span id="countdownNum" style="font-family:'Readex Pro',sans-serif;font-weight:700;color:var(--accent)">15</span>
-      <span>ث</span>
-    </div>
   </div>
 </div>
 
-<div class="nav">
+<!-- عداد التحديث التلقائي — مستقل دائماً ظاهر -->
+<div id="refreshCountdown" style="
+  position:fixed;
+  bottom:20px;
+  left:20px;
+  z-index:500;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:30px;
+  padding:8px 16px;
+  font-size:0.82rem;
+  color:var(--text-muted);
+  box-shadow:0 4px 16px rgba(0,0,0,0.25);
+  backdrop-filter:blur(8px);
+  user-select:none;
+" title="تحديث تلقائي للبيانات">
+  <span style="font-size:1rem;animation:spin 2s linear infinite;display:inline-block" id="refreshIcon">🔄</span>
+  <span style="font-family:'Readex Pro',sans-serif;font-weight:800;font-size:1.1rem;color:var(--accent);min-width:22px;text-align:center" id="countdownNum">15</span>
+  <span style="font-size:0.75rem">ث</span>
+</div>
+
+<style>
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+#refreshIcon { animation: none; }
+#refreshCountdown.refreshing #refreshIcon { animation: spin 0.6s linear infinite; }
+</style>
   <button class="nav-btn active" data-page="books"><span class="icon">📖</span> الكتب</button>
   <button class="nav-btn" data-page="add"><span class="icon">➕</span> إضافة كتاب</button>
   <button class="nav-btn" data-page="sell"><span class="icon">🧾</span> نقطة البيع</button>
@@ -344,16 +370,7 @@ body.light-mode .nav{background:rgba(255,255,255,0.95)}
       <div class="stat-card"><div class="stat-card-icon">📚</div><div class="stat-card-value" id="statTotalCopies">0</div><div class="stat-card-label">إجمالي النسخ</div></div>
       <div class="stat-card sales"><div class="stat-card-icon">💰</div><div class="stat-card-value" id="statStockValue">0</div><div class="stat-card-label">قيمة المخزون</div></div>
       <div class="stat-card profit"><div class="stat-card-icon">📈</div><div class="stat-card-value" id="statExpectedProfit">0</div><div class="stat-card-label">الربح المتوقع</div></div>
-      <div class="stat-card" style="border-color:rgba(167,139,250,0.3);cursor:pointer;position:relative" onclick="toggleDailyProfitPicker()" title="انقر لاختيار تاريخ">
-        <div class="stat-card-icon">🗓️</div>
-        <div class="stat-card-value" id="statDailyProfit" style="color:var(--purple)">0</div>
-        <div class="stat-card-label" style="color:var(--purple)">الربح اليومي الصافي <span id="dailyProfitDateLabel" style="font-size:0.7rem;opacity:0.75;display:block"></span></div>
-        <div id="dailyProfitPicker" style="display:none;position:absolute;top:100%;right:0;z-index:999;background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:10px;box-shadow:0 8px 24px rgba(0,0,0,0.3);min-width:200px;margin-top:6px" onclick="event.stopPropagation()">
-          <div style="font-size:0.8rem;font-weight:700;margin-bottom:8px;color:var(--text-secondary)">📅 اختر تاريخاً</div>
-          <input type="date" id="dailyProfitDateInput" class="form-input" style="font-size:0.85rem;padding:6px 10px" onchange="applyDailyProfitDate()">
-          <button class="btn btn-secondary" style="width:100%;margin-top:8px;font-size:0.8rem;padding:5px" onclick="resetDailyProfitToToday()">🔄 اليوم</button>
-        </div>
-      </div>
+      <div class="stat-card" style="border-color:rgba(167,139,250,0.3)"><div class="stat-card-icon">🗓️</div><div class="stat-card-value" id="statDailyProfit" style="color:var(--purple)">0</div><div class="stat-card-label" style="color:var(--purple)">الربح اليومي الصافي</div></div>
     </div>
     <div class="toolbar">
       <div class="search-box"><span class="search-icon">🔍</span><input type="text" id="searchInput" placeholder="ابحث عن كتاب..." oninput="filterBooks()"></div>
@@ -539,6 +556,11 @@ body.light-mode .nav{background:rgba(255,255,255,0.95)}
       <button class="btn btn-primary" onclick="saveSettings()">💾 حفظ الإعدادات</button>
     </div>
     <div class="settings-section">
+      <div class="settings-title">🔐 إدارة رمز PIN - المصروفات</div>
+      <p style="font-size:0.88rem;color:var(--text-secondary);margin-bottom:1rem;line-height:1.7">يمكنك تغيير رمز PIN الخاص بقسم المصروفات وكلمة السر الاحتياطية المستخدمة لاسترداده.</p>
+      <button class="btn btn-purple" onclick="openChangePinModal()">🔧 تغيير رمز PIN</button>
+    </div>
+    <div class="settings-section">
       <div class="settings-title">🗑️ إدارة البيانات</div>
       <p style="font-size:0.9rem;color:var(--text-secondary);margin-bottom:1rem;line-height:1.7">إذا تريد تبدأ من الصفر وتحذف الكتب التجريبية، اضغط الزر الأول. الكتب التجريبية لن ترجع مرة ثانية.</p>
       <div style="display:flex;gap:0.75rem;flex-wrap:wrap">
@@ -587,114 +609,96 @@ body.light-mode .nav{background:rgba(255,255,255,0.95)}
 <div class="toast-container" id="toastContainer"></div>
 
 <!-- PIN Modal للمصروفات -->
-<div class="modal-overlay" id="pinModal" style="z-index:2000"><div class="modal" style="max-width:360px">
-
-  <!-- شاشة: إدخال الرمز -->
-  <div id="pinScreen-enter">
-    <div class="modal-header"><div class="modal-title">🔒 رمز الدخول - المصروفات</div></div>
-    <div class="modal-body" style="text-align:center">
-      <div style="font-size:2.5rem;margin-bottom:1rem">🔐</div>
-      <p style="color:var(--text-secondary);margin-bottom:1.2rem;font-size:0.9rem">هذا القسم محمي. أدخل رمز PIN للدخول.</p>
-      <input type="password" id="pinInput" class="form-input" placeholder="أدخل رمز PIN" maxlength="8" style="text-align:center;font-size:1.5rem;letter-spacing:6px;font-family:'Readex Pro',sans-serif" onkeydown="if(event.key==='Enter')checkPin()">
-      <div id="pinError" style="color:var(--danger);font-size:0.85rem;margin-top:8px;display:none">❌ رمز PIN غير صحيح</div>
-      <div style="margin-top:1rem">
-        <button class="btn btn-secondary" style="font-size:0.8rem;padding:6px 14px" onclick="pinShowScreen('change')">🔑 تغيير الرمز</button>
-        <button class="btn btn-secondary" style="font-size:0.8rem;padding:6px 14px;margin-right:8px" onclick="pinShowScreen('forgot')">❓ نسيت الرمز</button>
-      </div>
-    </div>
-    <div class="modal-footer" style="justify-content:center;gap:1rem">
-      <button class="btn btn-primary" onclick="checkPin()">🔓 دخول</button>
-      <button class="btn btn-secondary" onclick="closePinModal()">إلغاء</button>
-    </div>
+<div class="modal-overlay" id="pinModal" style="z-index:2000"><div class="modal" style="max-width:340px">
+  <div class="modal-header"><div class="modal-title">🔒 رمز الدخول - المصروفات</div></div>
+  <div class="modal-body" style="text-align:center">
+    <div style="font-size:2.5rem;margin-bottom:1rem">🔐</div>
+    <p style="color:var(--text-secondary);margin-bottom:1.2rem;font-size:0.9rem">هذا القسم محمي. أدخل رمز PIN للدخول.</p>
+    <input type="password" id="pinInput" class="form-input" placeholder="أدخل رمز PIN" maxlength="8" style="text-align:center;font-size:1.5rem;letter-spacing:6px;font-family:'Readex Pro',sans-serif" onkeydown="if(event.key==='Enter')checkPin()">
+    <div id="pinError" style="color:var(--danger);font-size:0.85rem;margin-top:8px;display:none">❌ رمز PIN غير صحيح</div>
+    <button onclick="openRecoveryModal()" style="background:none;border:none;color:var(--text-muted);font-size:0.82rem;margin-top:12px;cursor:pointer;font-family:'Tajawal',sans-serif;text-decoration:underline">نسيت الرمز؟</button>
   </div>
-
-  <!-- شاشة: إنشاء رمز جديد (أول مرة) -->
-  <div id="pinScreen-create" style="display:none">
-    <div class="modal-header"><div class="modal-title">🆕 إنشاء رمز سري</div></div>
-    <div class="modal-body" style="text-align:center">
-      <div style="font-size:2.5rem;margin-bottom:1rem">🔏</div>
-      <p style="color:var(--text-secondary);margin-bottom:1.2rem;font-size:0.9rem">أنت تستخدم الرمز الافتراضي. أنشئ رمزك الخاص الآن.</p>
-      <div style="margin-bottom:12px">
-        <label style="display:block;font-size:0.85rem;font-weight:600;margin-bottom:6px;text-align:right">سؤال الأمان (لاسترداد الرمز لاحقاً)</label>
-        <select id="pinSecurityQ" class="form-input" style="font-size:0.9rem">
-          <option value="">-- اختر سؤالاً --</option>
-          <option value="اسم أمك قبل الزواج؟">اسم أمك قبل الزواج؟</option>
-          <option value="اسم مدرستك الابتدائية؟">اسم مدرستك الابتدائية؟</option>
-          <option value="اسم أول حيوان أليف لك؟">اسم أول حيوان أليف لك؟</option>
-          <option value="اسم مدينة ميلادك؟">اسم مدينة ميلادك؟</option>
-          <option value="اسم أفضل صديق لك في الطفولة؟">اسم أفضل صديق لك في الطفولة؟</option>
-        </select>
-      </div>
-      <div style="margin-bottom:12px">
-        <input type="text" id="pinSecurityA" class="form-input" placeholder="إجابة سؤال الأمان" style="font-size:0.9rem">
-      </div>
-      <div style="margin-bottom:12px">
-        <input type="password" id="pinCreate1" class="form-input" placeholder="رمز PIN الجديد" maxlength="8" style="text-align:center;font-size:1.3rem;letter-spacing:4px">
-      </div>
-      <input type="password" id="pinCreate2" class="form-input" placeholder="تأكيد رمز PIN" maxlength="8" style="text-align:center;font-size:1.3rem;letter-spacing:4px">
-      <div id="pinCreateError" style="color:var(--danger);font-size:0.85rem;margin-top:8px;display:none"></div>
-    </div>
-    <div class="modal-footer" style="justify-content:center;gap:1rem">
-      <button class="btn btn-primary" onclick="doCreatePin()">✅ حفظ الرمز</button>
-      <button class="btn btn-secondary" onclick="pinShowScreen('enter')">رجوع</button>
-    </div>
+  <div class="modal-footer" style="justify-content:center;gap:1rem">
+    <button class="btn btn-primary" onclick="checkPin()">🔓 دخول</button>
+    <button class="btn btn-secondary" onclick="closePinModal()">إلغاء</button>
   </div>
+</div></div>
 
-  <!-- شاشة: تغيير الرمز -->
-  <div id="pinScreen-change" style="display:none">
-    <div class="modal-header"><div class="modal-title">🔑 تغيير الرمز السري</div></div>
-    <div class="modal-body" style="text-align:center">
-      <div style="font-size:2.5rem;margin-bottom:1rem">🔄</div>
-      <div style="margin-bottom:12px">
-        <input type="password" id="pinChangeOld" class="form-input" placeholder="الرمز الحالي" maxlength="8" style="text-align:center;font-size:1.3rem;letter-spacing:4px">
+<!-- مودال استعادة PIN عبر الإيميل -->
+<div class="modal-overlay" id="recoveryModal" style="z-index:2100"><div class="modal" style="max-width:380px">
+  <div class="modal-header"><div class="modal-title">📧 استعادة رمز PIN</div><button class="modal-close" onclick="closeRecoveryModal()">&times;</button></div>
+  <div class="modal-body">
+
+    <!-- المرحلة 1: إرسال الكود -->
+    <div id="recoveryStep1">
+      <p style="color:var(--text-secondary);margin-bottom:1rem;font-size:0.88rem;line-height:1.7">سيُرسل كود مؤقت مكوّن من 6 أرقام إلى إيميلك لإعادة تعيين رمز PIN.</p>
+      <div class="form-group">
+        <label class="form-label">إيميلك</label>
+        <input type="email" id="recoveryEmail" class="form-input" placeholder="example@gmail.com" dir="ltr">
       </div>
-      <div style="margin-bottom:12px">
-        <input type="password" id="pinChangeNew1" class="form-input" placeholder="الرمز الجديد" maxlength="8" style="text-align:center;font-size:1.3rem;letter-spacing:4px">
+      <div id="recoveryStep1Error" style="color:var(--danger);font-size:0.85rem;margin-top:4px;display:none"></div>
+      <button class="btn btn-primary" style="width:100%;margin-top:0.5rem" onclick="sendRecoveryCode()" id="sendCodeBtn">
+        📨 إرسال الكود
+      </button>
+    </div>
+
+    <!-- المرحلة 2: إدخال الكود + PIN جديد -->
+    <div id="recoveryStep2" style="display:none">
+      <div style="background:var(--success-bg);border:1px solid rgba(16,185,129,0.3);border-radius:8px;padding:10px 14px;margin-bottom:1rem;font-size:0.85rem;color:var(--success)">
+        ✅ تم إرسال الكود إلى إيميلك. صالح لمدة 10 دقائق.
       </div>
-      <input type="password" id="pinChangeNew2" class="form-input" placeholder="تأكيد الرمز الجديد" maxlength="8" style="text-align:center;font-size:1.3rem;letter-spacing:4px">
-      <div id="pinChangeError" style="color:var(--danger);font-size:0.85rem;margin-top:8px;display:none"></div>
-      <div id="pinChangeSuccess" style="color:var(--success);font-size:0.85rem;margin-top:8px;display:none">✅ تم تغيير الرمز بنجاح!</div>
+      <div class="form-group">
+        <label class="form-label">الكود المُرسل (6 أرقام)</label>
+        <input type="text" id="recoveryCode" class="form-input" placeholder="123456" maxlength="6" style="letter-spacing:8px;text-align:center;font-family:'Readex Pro',sans-serif;font-size:1.3rem" dir="ltr">
+      </div>
+      <div class="form-group">
+        <label class="form-label">رمز PIN الجديد</label>
+        <input type="password" id="recoveryNewPin" class="form-input" placeholder="4-8 أرقام" maxlength="8" style="letter-spacing:4px">
+      </div>
+      <div class="form-group">
+        <label class="form-label">تأكيد رمز PIN</label>
+        <input type="password" id="recoveryConfirmPin" class="form-input" placeholder="أعد الكتابة" maxlength="8" style="letter-spacing:4px">
+      </div>
+      <div id="recoveryStep2Error" style="color:var(--danger);font-size:0.85rem;margin-top:4px;display:none"></div>
+      <button class="btn btn-primary" style="width:100%;margin-top:0.5rem" onclick="verifyAndResetPin()">🔓 تعيين رمز PIN الجديد</button>
+      <button onclick="document.getElementById('recoveryStep1').style.display='';document.getElementById('recoveryStep2').style.display='none'" style="background:none;border:none;color:var(--text-muted);font-size:0.82rem;margin-top:10px;cursor:pointer;font-family:'Tajawal',sans-serif;display:block;width:100%;text-align:center">← إعادة إرسال الكود</button>
     </div>
-    <div class="modal-footer" style="justify-content:center;gap:1rem">
-      <button class="btn btn-primary" onclick="doChangePin()">💾 تغيير</button>
-      <button class="btn btn-secondary" onclick="pinShowScreen('enter')">رجوع</button>
-    </div>
+
   </div>
+</div></div>
 
-  <!-- شاشة: نسيت الرمز -->
-  <div id="pinScreen-forgot" style="display:none">
-    <div class="modal-header"><div class="modal-title">❓ استرداد الرمز السري</div></div>
-    <div class="modal-body" style="text-align:center">
-      <div style="font-size:2.5rem;margin-bottom:1rem">🆘</div>
-      <div id="forgotQDiv">
-        <p style="color:var(--text-secondary);margin-bottom:1rem;font-size:0.9rem">أجب على سؤال الأمان لإعادة تعيين الرمز.</p>
-        <p id="forgotQText" style="font-weight:700;margin-bottom:12px;font-size:0.95rem"></p>
-        <input type="text" id="forgotAnswer" class="form-input" placeholder="إجابتك" style="font-size:0.9rem">
-        <div id="forgotError" style="color:var(--danger);font-size:0.85rem;margin-top:8px;display:none">❌ إجابة غير صحيحة</div>
-        <div class="modal-footer" style="justify-content:center;gap:1rem;margin-top:1rem;padding:0;border:none">
-          <button class="btn btn-primary" onclick="doForgotCheck()">تحقق</button>
-          <button class="btn btn-secondary" onclick="pinShowScreen('enter')">رجوع</button>
-        </div>
-      </div>
-      <div id="forgotResetDiv" style="display:none">
-        <p style="color:var(--success);margin-bottom:1rem;font-size:0.9rem">✅ صحيح! أدخل رمزاً جديداً.</p>
-        <div style="margin-bottom:12px">
-          <input type="password" id="forgotNew1" class="form-input" placeholder="الرمز الجديد" maxlength="8" style="text-align:center;font-size:1.3rem;letter-spacing:4px">
-        </div>
-        <input type="password" id="forgotNew2" class="form-input" placeholder="تأكيد الرمز الجديد" maxlength="8" style="text-align:center;font-size:1.3rem;letter-spacing:4px">
-        <div id="forgotResetError" style="color:var(--danger);font-size:0.85rem;margin-top:8px;display:none"></div>
-        <div class="modal-footer" style="justify-content:center;gap:1rem;margin-top:1rem;padding:0;border:none">
-          <button class="btn btn-primary" onclick="doForgotReset()">✅ حفظ</button>
-        </div>
-      </div>
+<!-- مودال تغيير PIN من الإعدادات -->
+<div class="modal-overlay" id="changePinModal" style="z-index:2000"><div class="modal" style="max-width:380px">
+  <div class="modal-header"><div class="modal-title">🔧 إدارة رمز PIN - المصروفات</div><button class="modal-close" onclick="closeChangePinModal()">&times;</button></div>
+  <div class="modal-body">
+    <div style="background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem;margin-bottom:1rem">
+      <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:4px">حالة الرمز</div>
+      <div style="font-weight:700;color:var(--accent)" id="pinStatusLabel">—</div>
     </div>
+    <div class="form-group">
+      <label class="form-label">رمز PIN الحالي</label>
+      <input type="password" id="cpCurrentPin" class="form-input" placeholder="الرمز الحالي" maxlength="8">
+    </div>
+    <div class="form-group">
+      <label class="form-label">رمز PIN الجديد</label>
+      <input type="password" id="cpNewPin" class="form-input" placeholder="رمز جديد (4-8 أحرف)" maxlength="8" style="letter-spacing:4px">
+    </div>
+    <div class="form-group">
+      <label class="form-label">تأكيد رمز PIN الجديد</label>
+      <input type="password" id="cpConfirmPin" class="form-input" placeholder="أعد الكتابة" maxlength="8" style="letter-spacing:4px">
+    </div>
+    <div id="cpError" style="color:var(--danger);font-size:0.85rem;margin-top:4px;display:none"></div>
   </div>
-
+  <div class="modal-footer">
+    <button class="btn btn-primary" onclick="saveChangedPin()">💾 حفظ</button>
+    <button class="btn btn-secondary" onclick="closeChangePinModal()">إلغاء</button>
+  </div>
 </div></div>
 
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 
 <script>
 // ==================== FIREBASE INIT ====================
@@ -799,7 +803,7 @@ function formatNum(n){if(n===undefined||n===null)return'0';return Number(n).toLo
 function showToast(msg,type='success'){const c=document.getElementById('toastContainer'),t=document.createElement('div');t.className=`toast ${type}`;t.innerHTML=`${type==='success'?'✅':'❌'} ${msg}`;c.appendChild(t);setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.remove(),300)},3000)}
 
 // ==================== NAV ====================
-document.querySelectorAll('.nav-btn').forEach(btn=>{btn.addEventListener('click',()=>{const page=btn.dataset.page;showPage(page)})});
+document.querySelectorAll('.nav-btn').forEach(btn=>{btn.addEventListener('click',(e)=>{const page=btn.dataset.page;if(page==='expenses')return;showPage(page)})});
 function showPage(page){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
@@ -1321,35 +1325,22 @@ function resetAllData(){
 }
 
 // ==================== PIN PROTECTION (EXPENSES) ====================
+// القيم الافتراضية — تُخزن في localStorage بعد أول تهيئة
+const PIN_STORAGE_KEY = 'uruk_expenses_pin';
+const RECOVERY_STORAGE_KEY = 'uruk_expenses_recovery';
 const DEFAULT_PIN = '1234';
+const DEFAULT_RECOVERY = 'uruk2024';
+
+function getStoredPin() {
+  return localStorage.getItem(PIN_STORAGE_KEY) || DEFAULT_PIN;
+}
+function getStoredRecovery() {
+  return localStorage.getItem(RECOVERY_STORAGE_KEY) || DEFAULT_RECOVERY;
+}
+
 let _expensesUnlocked = false;
 
-// دوال الحفظ والاسترجاع من localStorage
-function getStoredPin() { return localStorage.getItem('expenses_pin') || DEFAULT_PIN; }
-function getSecurityQ() { return localStorage.getItem('expenses_security_q') || ''; }
-function getSecurityA() { return (localStorage.getItem('expenses_security_a') || '').toLowerCase().trim(); }
-function isPinCustomized() { return !!localStorage.getItem('expenses_pin'); }
-
-function pinShowScreen(screen) {
-  ['enter','create','change','forgot'].forEach(s => {
-    document.getElementById('pinScreen-' + s).style.display = s === screen ? '' : 'none';
-  });
-  // إعادة ضبط حقول الأخطاء
-  ['pinError','pinCreateError','pinChangeError','pinChangeSuccess','forgotError','forgotResetError'].forEach(id => {
-    const el = document.getElementById(id); if(el) el.style.display = 'none';
-  });
-  if (screen === 'forgot') {
-    const q = getSecurityQ();
-    if (!q) {
-      document.getElementById('forgotQText').textContent = '';
-      document.getElementById('forgotQDiv').innerHTML = '<p style="color:var(--danger)">⚠️ لم يتم تعيين سؤال أمان. لا يمكن استرداد الرمز.</p><div class="modal-footer" style="justify-content:center;padding:0;border:none;margin-top:1rem"><button class="btn btn-secondary" onclick="pinShowScreen(\'enter\')">رجوع</button></div>';
-    } else {
-      document.getElementById('forgotQText').textContent = q;
-      document.getElementById('forgotQDiv').style.display = '';
-      document.getElementById('forgotResetDiv').style.display = 'none';
-    }
-  }
-}
+let _previousPage = 'books'; // تتبع الصفحة السابقة قبل طلب PIN
 
 function requestPinForExpenses(event) {
   event.preventDefault();
@@ -1360,15 +1351,13 @@ function requestPinForExpenses(event) {
     document.getElementById('expensesNavBtn').classList.add('active');
     return;
   }
+  // احفظ الصفحة الحالية للرجوع إليها عند الإلغاء
+  const activePage = document.querySelector('.page.active');
+  if (activePage) _previousPage = activePage.id.replace('page-', '');
+  document.getElementById('pinInput').value = '';
+  document.getElementById('pinError').style.display = 'none';
   document.getElementById('pinModal').classList.add('active');
-  // إذا لم يتم تخصيص رمز بعد، اعرض شاشة الإنشاء
-  if (!isPinCustomized()) {
-    pinShowScreen('create');
-  } else {
-    pinShowScreen('enter');
-    document.getElementById('pinInput').value = '';
-    setTimeout(() => document.getElementById('pinInput').focus(), 150);
-  }
+  setTimeout(() => document.getElementById('pinInput').focus(), 150);
 }
 
 function checkPin() {
@@ -1388,126 +1377,195 @@ function checkPin() {
   }
 }
 
-function doCreatePin() {
-  const q = document.getElementById('pinSecurityQ').value.trim();
-  const a = document.getElementById('pinSecurityA').value.trim();
-  const p1 = document.getElementById('pinCreate1').value;
-  const p2 = document.getElementById('pinCreate2').value;
-  const err = document.getElementById('pinCreateError');
-  if (!q) { err.textContent = '⚠️ اختر سؤال الأمان'; err.style.display = 'block'; return; }
-  if (!a) { err.textContent = '⚠️ أدخل إجابة سؤال الأمان'; err.style.display = 'block'; return; }
-  if (p1.length < 4) { err.textContent = '⚠️ الرمز يجب أن يكون 4 أحرف على الأقل'; err.style.display = 'block'; return; }
-  if (p1 !== p2) { err.textContent = '⚠️ الرمزان غير متطابقين'; err.style.display = 'block'; return; }
-  localStorage.setItem('expenses_pin', p1);
-  localStorage.setItem('expenses_security_q', q);
-  localStorage.setItem('expenses_security_a', a.toLowerCase().trim());
-  showToast('✅ تم حفظ الرمز السري بنجاح!', 'success');
-  pinShowScreen('enter');
+function closePinModal() {
+  document.getElementById('pinModal').classList.remove('active');
   document.getElementById('pinInput').value = '';
-  setTimeout(() => document.getElementById('pinInput').focus(), 150);
+  // ارجع للصفحة السابقة وليس المصروفات
+  showPage(_previousPage);
 }
 
-function doChangePin() {
-  const oldP = document.getElementById('pinChangeOld').value;
-  const n1 = document.getElementById('pinChangeNew1').value;
-  const n2 = document.getElementById('pinChangeNew2').value;
-  const err = document.getElementById('pinChangeError');
-  const ok = document.getElementById('pinChangeSuccess');
-  err.style.display = 'none'; ok.style.display = 'none';
-  if (oldP !== getStoredPin()) { err.textContent = '❌ الرمز الحالي غير صحيح'; err.style.display = 'block'; return; }
-  if (n1.length < 4) { err.textContent = '⚠️ الرمز الجديد يجب أن يكون 4 أحرف على الأقل'; err.style.display = 'block'; return; }
-  if (n1 !== n2) { err.textContent = '⚠️ الرمزان الجديدان غير متطابقين'; err.style.display = 'block'; return; }
-  localStorage.setItem('expenses_pin', n1);
-  ok.style.display = 'block';
-  ['pinChangeOld','pinChangeNew1','pinChangeNew2'].forEach(id => document.getElementById(id).value = '');
-  setTimeout(() => pinShowScreen('enter'), 1500);
+// --- إعداد EmailJS ---
+// ضع بيانات حسابك في EmailJS هنا:
+const EMAILJS_PUBLIC_KEY  = 'YOUR_PUBLIC_KEY';   // من لوحة EmailJS → Account → Public Key
+const EMAILJS_SERVICE_ID  = 'YOUR_SERVICE_ID';   // من EmailJS → Email Services
+const EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID';  // من EmailJS → Email Templates
+const OWNER_EMAIL         = 'YOUR_EMAIL@gmail.com'; // إيميلك الشخصي
+
+let _recoveryCode = null;
+let _recoveryCodeExpiry = null;
+
+function openRecoveryModal() {
+  document.getElementById('pinModal').classList.remove('active');
+  document.getElementById('recoveryStep1').style.display = '';
+  document.getElementById('recoveryStep2').style.display = 'none';
+  document.getElementById('recoveryStep1Error').style.display = 'none';
+  document.getElementById('recoveryEmail').value = '';
+  document.getElementById('recoveryModal').classList.add('active');
+  setTimeout(() => document.getElementById('recoveryEmail').focus(), 150);
 }
 
-function doForgotCheck() {
-  const ans = document.getElementById('forgotAnswer').value.toLowerCase().trim();
-  if (ans === getSecurityA()) {
-    document.getElementById('forgotQDiv').style.display = 'none';
-    document.getElementById('forgotResetDiv').style.display = '';
-  } else {
-    document.getElementById('forgotError').style.display = 'block';
-    setTimeout(() => { document.getElementById('forgotError').style.display = 'none'; }, 2500);
+function closeRecoveryModal() {
+  document.getElementById('recoveryModal').classList.remove('active');
+  // ارجع لمودال PIN
+  document.getElementById('pinInput').value = '';
+  document.getElementById('pinError').style.display = 'none';
+  document.getElementById('pinModal').classList.add('active');
+}
+
+async function sendRecoveryCode() {
+  const email = document.getElementById('recoveryEmail').value.trim();
+  const errEl = document.getElementById('recoveryStep1Error');
+  const btn   = document.getElementById('sendCodeBtn');
+  errEl.style.display = 'none';
+
+  if (!email || !email.includes('@')) {
+    errEl.textContent = '❌ أدخل إيميلاً صحيحاً';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (email !== OWNER_EMAIL) {
+    errEl.textContent = '❌ هذا الإيميل غير مسجّل في النظام';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  // توليد كود 6 أرقام
+  _recoveryCode = Math.floor(100000 + Math.random() * 900000).toString();
+  _recoveryCodeExpiry = Date.now() + 10 * 60 * 1000; // 10 دقائق
+
+  btn.textContent = '⏳ جاري الإرسال...';
+  btn.disabled = true;
+
+  try {
+    emailjs.init(EMAILJS_PUBLIC_KEY);
+    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+      to_email: email,
+      to_name: 'سعد',
+      recovery_code: _recoveryCode,
+      app_name: 'كاشير أوروك'
+    });
+    document.getElementById('recoveryStep1').style.display = 'none';
+    document.getElementById('recoveryStep2').style.display = '';
+    document.getElementById('recoveryCode').value = '';
+    document.getElementById('recoveryNewPin').value = '';
+    document.getElementById('recoveryConfirmPin').value = '';
+    document.getElementById('recoveryStep2Error').style.display = 'none';
+    setTimeout(() => document.getElementById('recoveryCode').focus(), 100);
+  } catch(e) {
+    errEl.textContent = '❌ فشل الإرسال. تحقق من إعداد EmailJS.';
+    errEl.style.display = 'block';
+    _recoveryCode = null;
+    console.error('EmailJS error:', e);
+  } finally {
+    btn.textContent = '📨 إرسال الكود';
+    btn.disabled = false;
   }
 }
 
-function doForgotReset() {
-  const n1 = document.getElementById('forgotNew1').value;
-  const n2 = document.getElementById('forgotNew2').value;
-  const err = document.getElementById('forgotResetError');
-  if (n1.length < 4) { err.textContent = '⚠️ الرمز يجب أن يكون 4 أحرف على الأقل'; err.style.display = 'block'; return; }
-  if (n1 !== n2) { err.textContent = '⚠️ الرمزان غير متطابقين'; err.style.display = 'block'; return; }
-  localStorage.setItem('expenses_pin', n1);
-  showToast('✅ تم تعيين الرمز الجديد بنجاح!', 'success');
-  document.getElementById('pinModal').classList.remove('active');
+function verifyAndResetPin() {
+  const code = document.getElementById('recoveryCode').value.trim();
+  const np   = document.getElementById('recoveryNewPin').value;
+  const cp   = document.getElementById('recoveryConfirmPin').value;
+  const errEl = document.getElementById('recoveryStep2Error');
+  errEl.style.display = 'none';
+
+  if (!_recoveryCode || Date.now() > _recoveryCodeExpiry) {
+    errEl.textContent = '❌ انتهت صلاحية الكود. أعد الإرسال.';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (code !== _recoveryCode) {
+    errEl.textContent = '❌ الكود غير صحيح';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (!np || np.length < 4) {
+    errEl.textContent = '❌ رمز PIN يجب أن يكون 4 أحرف على الأقل';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (np !== cp) {
+    errEl.textContent = '❌ الرمزان غير متطابقين';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  localStorage.setItem(PIN_STORAGE_KEY, np);
+  _recoveryCode = null;
+  _recoveryCodeExpiry = null;
+  document.getElementById('recoveryModal').classList.remove('active');
+  showToast('✅ تم تعيين رمز PIN الجديد بنجاح');
 }
 
-function closePinModal() {
-  document.getElementById('pinModal').classList.remove('active');
+// --- تغيير PIN من الإعدادات ---
+function openChangePinModal() {
+  document.getElementById('cpCurrentPin').value = '';
+  document.getElementById('cpNewPin').value = '';
+  document.getElementById('cpConfirmPin').value = '';
+  document.getElementById('cpNewRecovery').value = '';
+  document.getElementById('cpError').style.display = 'none';
+  document.getElementById('pinStatusLabel').textContent = `رمز PIN محدد ✅  |  كلمة السر الاحتياطية محددة ✅`;
+  document.getElementById('changePinModal').classList.add('active');
+  setTimeout(() => document.getElementById('cpCurrentPin').focus(), 150);
+}
+
+function closeChangePinModal() {
+  document.getElementById('changePinModal').classList.remove('active');
+}
+
+function saveChangedPin() {
+  const current = document.getElementById('cpCurrentPin').value;
+  const np = document.getElementById('cpNewPin').value;
+  const cp = document.getElementById('cpConfirmPin').value;
+  const errEl = document.getElementById('cpError');
+  errEl.style.display = 'none';
+
+  if (current !== getStoredPin()) {
+    errEl.textContent = '❌ رمز PIN الحالي غير صحيح';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (!np || np.length < 4) {
+    errEl.textContent = '❌ رمز PIN الجديد يجب أن يكون 4 أحرف على الأقل';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (np !== cp) {
+    errEl.textContent = '❌ رمزا PIN الجديد غير متطابقين';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  localStorage.setItem(PIN_STORAGE_KEY, np);
+  _expensesUnlocked = false;
+  closeChangePinModal();
+  showToast('✅ تم تحديث رمز PIN بنجاح');
 }
 
 // ==================== DAILY PROFIT ====================
-// التاريخ المختار للربح اليومي (null = اليوم)
-let _dailyProfitDate = null;
-
-function getDailyProfit(dateStr) {
-  const target = dateStr || new Date().toISOString().slice(0, 10);
+function getDailyProfit() {
+  const today = new Date().toISOString().slice(0, 10);
   const sales = getSales();
   const expenses = getExpenses();
 
-  const daySales = sales.filter(s => s.date && s.date.slice(0, 10) === target);
-  const rawProfit = daySales.reduce((sum, s) => sum + (s.profit || 0), 0);
+  // ربح اليوم الخام من المبيعات
+  const todaySales = sales.filter(s => s.date && s.date.slice(0, 10) === today);
+  const rawProfit = todaySales.reduce((sum, s) => sum + (s.profit || 0), 0);
 
-  const dayExpenses = expenses.filter(e => e.type === 'expense' && e.date === target)
+  // مصروفات اليوم
+  const todayExpenses = expenses.filter(e => e.type === 'expense' && e.date === today)
     .reduce((sum, e) => sum + e.amount, 0);
 
-  const dayPromo = expenses.filter(e => e.type === 'promo' && e.date === target)
+  // ترويج اليوم
+  const todayPromo = expenses.filter(e => e.type === 'promo' && e.date === today)
     .reduce((sum, e) => sum + e.amount, 0);
 
+  // خصم 10% كنسبة الرواجع
   const returnsDeduction = rawProfit * 0.10;
-  const netProfit = rawProfit - dayExpenses - dayPromo - returnsDeduction;
+
+  const netProfit = rawProfit - todayExpenses - todayPromo - returnsDeduction;
   return Math.round(netProfit);
 }
-
-function toggleDailyProfitPicker() {
-  const picker = document.getElementById('dailyProfitPicker');
-  if (!picker) return;
-  const isOpen = picker.style.display !== 'none';
-  picker.style.display = isOpen ? 'none' : '';
-  if (!isOpen) {
-    const inp = document.getElementById('dailyProfitDateInput');
-    inp.value = _dailyProfitDate || new Date().toISOString().slice(0, 10);
-    inp.max = new Date().toISOString().slice(0, 10);
-  }
-}
-
-function applyDailyProfitDate() {
-  const val = document.getElementById('dailyProfitDateInput').value;
-  if (!val) return;
-  _dailyProfitDate = val;
-  document.getElementById('dailyProfitPicker').style.display = 'none';
-  updateDailyProfitStat();
-}
-
-function resetDailyProfitToToday() {
-  _dailyProfitDate = null;
-  document.getElementById('dailyProfitPicker').style.display = 'none';
-  updateDailyProfitStat();
-}
-
-// إغلاق التقويم عند الضغط خارجه
-document.addEventListener('click', function(e) {
-  const picker = document.getElementById('dailyProfitPicker');
-  if (picker && picker.style.display !== 'none') {
-    const card = picker.closest('.stat-card');
-    if (card && !card.contains(e.target)) {
-      picker.style.display = 'none';
-    }
-  }
-});
 
 // ==================== AUTO REFRESH (15 seconds countdown) ====================
 let _countdownVal = 15;
@@ -1531,7 +1589,22 @@ function startAutoRefresh() {
 
 function updateCountdownDisplay() {
   const el = document.getElementById('countdownNum');
-  if (el) el.textContent = _countdownVal;
+  const box = document.getElementById('refreshCountdown');
+  if (!el) return;
+  el.textContent = _countdownVal;
+  // لون يتغير حسب الوقت
+  if (_countdownVal <= 3) {
+    el.style.color = 'var(--danger)';
+  } else if (_countdownVal <= 7) {
+    el.style.color = 'var(--accent)';
+  } else {
+    el.style.color = 'var(--success)';
+  }
+  // animation عند الصفر
+  if (_countdownVal === 0 && box) {
+    box.classList.add('refreshing');
+    setTimeout(() => box && box.classList.remove('refreshing'), 1500);
+  }
 }
 
 async function silentRefresh() {
@@ -1566,18 +1639,9 @@ async function silentRefresh() {
 }
 
 function updateDailyProfitStat() {
-  const dp = getDailyProfit(_dailyProfitDate);
+  const dp = getDailyProfit();
   const el = document.getElementById('statDailyProfit');
   if (el) el.textContent = formatNum(dp);
-  const lbl = document.getElementById('dailyProfitDateLabel');
-  if (lbl) {
-    if (_dailyProfitDate) {
-      const d = new Date(_dailyProfitDate);
-      lbl.textContent = d.toLocaleDateString('ar-IQ', {year:'numeric',month:'short',day:'numeric'});
-    } else {
-      lbl.textContent = 'اليوم';
-    }
-  }
 }
 
 // ==================== INIT ====================
