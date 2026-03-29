@@ -1386,10 +1386,10 @@ function closePinModal() {
 
 // --- إعداد EmailJS ---
 // ضع بيانات حسابك في EmailJS هنا:
-const EMAILJS_PUBLIC_KEY  = 'YOUR_PUBLIC_KEY';   // من لوحة EmailJS → Account → Public Key
-const EMAILJS_SERVICE_ID  = 'YOUR_SERVICE_ID';   // من EmailJS → Email Services
-const EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID';  // من EmailJS → Email Templates
-const OWNER_EMAIL         = 'YOUR_EMAIL@gmail.com'; // إيميلك الشخصي
+const EMAILJS_PUBLIC_KEY  = 'bhxZKxg7AUhpZGOF2';
+const EMAILJS_SERVICE_ID  = 'saadaljboori';
+const EMAILJS_TEMPLATE_ID = 'template_llet73l';
+const OWNER_EMAIL         = 'Saadaljboori1995@gmail.com'; // إيميلك الشخصي
 
 let _recoveryCode = null;
 let _recoveryCodeExpiry = null;
@@ -1441,7 +1441,8 @@ async function sendRecoveryCode() {
     await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
       to_email: email,
       to_name: 'سعد',
-      recovery_code: _recoveryCode,
+      passcode: _recoveryCode,
+      time: new Date(Date.now() + 10*60*1000).toLocaleTimeString('en-GB'),
       app_name: 'كاشير أوروك'
     });
     document.getElementById('recoveryStep1').style.display = 'none';
