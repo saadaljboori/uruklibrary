@@ -319,7 +319,7 @@ body.light-mode .nav{background:rgba(255,255,255,0.95)}
   </div>
 </div>
 
-<!-- عداد التحديث التلقائي — مستقل دائماً ظاهر -->
+ — مستقل دائماً ظاهر -->
 <div id="refreshCountdown" style="
   position:fixed;
   bottom:20px;
@@ -370,7 +370,11 @@ body.light-mode .nav{background:rgba(255,255,255,0.95)}
       <div class="stat-card"><div class="stat-card-icon">📚</div><div class="stat-card-value" id="statTotalCopies">0</div><div class="stat-card-label">إجمالي النسخ</div></div>
       <div class="stat-card sales"><div class="stat-card-icon">💰</div><div class="stat-card-value" id="statStockValue">0</div><div class="stat-card-label">قيمة المخزون</div></div>
       <div class="stat-card profit"><div class="stat-card-icon">📈</div><div class="stat-card-value" id="statExpectedProfit">0</div><div class="stat-card-label">الربح المتوقع</div></div>
-      <div class="stat-card" style="border-color:rgba(167,139,250,0.3)"><div class="stat-card-icon">🗓️</div><div class="stat-card-value" id="statDailyProfit" style="color:var(--purple)">0</div><div class="stat-card-label" style="color:var(--purple)">الربح اليومي الصافي</div></div>
+      <div class="stat-card" style="border-color:rgba(167,139,250,0.3);cursor:pointer;transition:all 0.2s" onclick="openDailyProfitModal()" title="اضغط لعرض ربح يوم معين">
+        <div class="stat-card-icon">🗓️</div>
+        <div class="stat-card-value" id="statDailyProfit" style="color:var(--purple)">0</div>
+        <div class="stat-card-label" style="color:var(--purple)">الربح اليومي الصافي <span style="font-size:0.7rem;opacity:0.7">← اضغط</span></div>
+      </div>
     </div>
     <div class="toolbar">
       <div class="search-box"><span class="search-icon">🔍</span><input type="text" id="searchInput" placeholder="ابحث عن كتاب..." oninput="filterBooks()"></div>
@@ -608,6 +612,39 @@ body.light-mode .nav{background:rgba(255,255,255,0.95)}
 
 <div class="toast-container" id="toastContainer"></div>
 
+<!-- مودال الربح اليومي -->
+<div class="modal-overlay" id="dailyProfitModal"><div class="modal" style="max-width:480px">
+  <div class="modal-header">
+    <div class="modal-title">🗓️ الربح اليومي الصافي</div>
+    <button class="modal-close" onclick="document.getElementById('dailyProfitModal').classList.remove('active')">&times;</button>
+  </div>
+  <div class="modal-body">
+    <div class="form-group">
+      <label class="form-label">اختر التاريخ</label>
+      <input type="date" class="form-input" id="dailyProfitDate" onchange="calcDailyProfitForDate()" style="font-family:'Readex Pro',sans-serif;font-size:1rem">
+    </div>
+    <div id="dailyProfitResult" style="display:none;margin-top:1rem">
+      <div style="background:var(--purple-bg);border:1px solid rgba(167,139,250,0.3);border-radius:var(--radius);padding:1.2rem;text-align:center;margin-bottom:1rem">
+        <div style="font-size:0.85rem;color:var(--purple);margin-bottom:6px">الربح الصافي ليوم</div>
+        <div id="dpResultDate" style="font-size:0.9rem;color:var(--text-muted);margin-bottom:8px"></div>
+        <div id="dpResultValue" style="font-family:'Readex Pro',sans-serif;font-size:2rem;font-weight:800"></div>
+      </div>
+      <div style="background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden">
+        <div class="report-item" style="padding:10px 14px"><span class="report-item-label">💰 ربح المبيعات الخام</span><span class="report-item-value" id="dpRawProfit" style="color:var(--success)"></span></div>
+        <div class="report-item" style="padding:10px 14px"><span class="report-item-label">📢 مصروف الترويج</span><span class="report-item-value" id="dpPromo" style="color:var(--info)"></span></div>
+        <div class="report-item" style="padding:10px 14px"><span class="report-item-label">💸 المصروفات</span><span class="report-item-value" id="dpExpenses" style="color:var(--danger)"></span></div>
+        <div class="report-item" style="padding:10px 14px"><span class="report-item-label">🔄 خصم الرواجع (10%)</span><span class="report-item-value" id="dpReturns" style="color:var(--danger)"></span></div>
+        <div class="report-item" style="padding:10px 14px;border-top:2px solid var(--border)"><span style="font-weight:700">📦 عدد الفواتير</span><span class="report-item-value" id="dpInvoices"></span></div>
+        <div class="report-item" style="padding:10px 14px"><span style="font-weight:700">📚 نسخ مباعة</span><span class="report-item-value" id="dpQty"></span></div>
+      </div>
+    </div>
+    <div id="dailyProfitEmpty" style="display:none;text-align:center;padding:2rem;color:var(--text-muted)">
+      <div style="font-size:2rem;margin-bottom:0.5rem">📭</div>
+      <div>لا توجد مبيعات في هذا اليوم</div>
+    </div>
+  </div>
+</div></div>
+
 <!-- PIN Modal للمصروفات -->
 <div class="modal-overlay" id="pinModal" style="z-index:2000"><div class="modal" style="max-width:340px">
   <div class="modal-header"><div class="modal-title">🔒 رمز الدخول - المصروفات</div></div>
@@ -718,15 +755,28 @@ const db = firebase.firestore();
 let _books = [], _sales = [], _fields = [], _settings = {}, _dataLoaded = false;
 
 async function loadAllData() {
-  showToast('جاري تحميل البيانات...', 'success');
+  // أولاً: حمّل البيانات المحلية فوراً بدون انتظار
+  _books = JSON.parse(localStorage.getItem('library_books') || '[]');
+  _sales = JSON.parse(localStorage.getItem('library_sales') || '[]');
+  _fields = JSON.parse(localStorage.getItem('library_custom_fields') || '[]');
+  _settings = JSON.parse(localStorage.getItem('library_settings') || '{}');
+  _reservations = JSON.parse(localStorage.getItem('library_reservations') || '[]');
+  _expenses = JSON.parse(localStorage.getItem('library_expenses') || '[]');
+  _dataLoaded = true;
+
+  // ثانياً: حدّث من Firebase في الخلفية بدون إيقاف الواجهة
   try {
-    const [booksSnap, salesSnap, fieldsSnap, settingsSnap, resSnap, expSnap] = await Promise.all([
-      db.collection('books').get(),
-      db.collection('sales').get(),
-      db.collection('customFields').get(),
-      db.collection('settings').doc('main').get(),
-      db.collection('reservations').get(),
-      db.collection('expenses').get()
+    const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 8000));
+    const [booksSnap, salesSnap, fieldsSnap, settingsSnap, resSnap, expSnap] = await Promise.race([
+      Promise.all([
+        db.collection('books').get(),
+        db.collection('sales').get(),
+        db.collection('customFields').get(),
+        db.collection('settings').doc('main').get(),
+        db.collection('reservations').get(),
+        db.collection('expenses').get()
+      ]),
+      timeout
     ]);
     _books = booksSnap.docs.map(d => ({ id: d.id, ...d.data() }));
     _sales = salesSnap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -734,18 +784,10 @@ async function loadAllData() {
     _settings = settingsSnap.exists ? settingsSnap.data() : {};
     _reservations = resSnap.docs.map(d => ({ id: d.id, ...d.data() }));
     _expenses = expSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-    _dataLoaded = true;
-    showToast('تم تحميل البيانات ✅');
+    // حدّث الواجهة بعد وصول بيانات Firebase
+    renderBooks(); updateHeaderStats(); updateDailyProfitStat();
   } catch (e) {
-    console.error('Firebase load error:', e);
-    showToast('خطأ بالاتصال - جاري استخدام البيانات المحلية', 'error');
-    _books = JSON.parse(localStorage.getItem('library_books') || '[]');
-    _sales = JSON.parse(localStorage.getItem('library_sales') || '[]');
-    _fields = JSON.parse(localStorage.getItem('library_custom_fields') || '[]');
-    _settings = JSON.parse(localStorage.getItem('library_settings') || '{}');
-    _reservations = JSON.parse(localStorage.getItem('library_reservations') || '[]');
-    _expenses = JSON.parse(localStorage.getItem('library_expenses') || '[]');
-    _dataLoaded = true;
+    console.error('Firebase sync error:', e);
   }
 }
 
@@ -1544,6 +1586,61 @@ function saveChangedPin() {
   showToast('✅ تم تحديث رمز PIN بنجاح');
 }
 
+// ==================== DAILY PROFIT MODAL ====================
+function openDailyProfitModal() {
+  const today = new Date().toISOString().slice(0, 10);
+  document.getElementById('dailyProfitDate').value = today;
+  document.getElementById('dailyProfitModal').classList.add('active');
+  calcDailyProfitForDate();
+}
+
+function calcDailyProfitForDate() {
+  const date = document.getElementById('dailyProfitDate').value;
+  if (!date) return;
+
+  const sales = getSales();
+  const expenses = getExpenses();
+
+  const todaySales = sales.filter(s => s.date && s.date.slice(0, 10) === date);
+  const rawProfit = todaySales.reduce((sum, s) => sum + (s.profit || 0), 0);
+  const totalQty = todaySales.reduce((sum, s) => sum + s.items.reduce((a, i) => a + i.qty, 0), 0);
+
+  const todayExpenses = expenses.filter(e => e.type === 'expense' && e.date === date)
+    .reduce((sum, e) => sum + e.amount, 0);
+  const todayPromo = expenses.filter(e => e.type === 'promo' && e.date === date)
+    .reduce((sum, e) => sum + e.amount, 0);
+  const returnsDeduction = Math.round(rawProfit * 0.10);
+  const netProfit = Math.round(rawProfit - todayExpenses - todayPromo - returnsDeduction);
+
+  const resultEl = document.getElementById('dailyProfitResult');
+  const emptyEl = document.getElementById('dailyProfitEmpty');
+
+  if (!todaySales.length && !todayExpenses && !todayPromo) {
+    resultEl.style.display = 'none';
+    emptyEl.style.display = 'block';
+    return;
+  }
+
+  resultEl.style.display = 'block';
+  emptyEl.style.display = 'none';
+
+  // تنسيق التاريخ
+  const d = new Date(date + 'T00:00:00');
+  const dateFormatted = d.toLocaleDateString('ar-IQ', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+  document.getElementById('dpResultDate').textContent = dateFormatted;
+  const valEl = document.getElementById('dpResultValue');
+  valEl.textContent = formatNum(netProfit) + ' د.ع';
+  valEl.style.color = netProfit >= 0 ? 'var(--purple)' : 'var(--danger)';
+
+  document.getElementById('dpRawProfit').textContent = formatNum(rawProfit) + ' د.ع';
+  document.getElementById('dpPromo').textContent = '− ' + formatNum(todayPromo) + ' د.ع';
+  document.getElementById('dpExpenses').textContent = '− ' + formatNum(todayExpenses) + ' د.ع';
+  document.getElementById('dpReturns').textContent = '− ' + formatNum(returnsDeduction) + ' د.ع';
+  document.getElementById('dpInvoices').textContent = todaySales.length + ' فاتورة';
+  document.getElementById('dpQty').textContent = totalQty + ' نسخة';
+}
+
 // ==================== DAILY PROFIT ====================
 function getDailyProfit() {
   const today = new Date().toISOString().slice(0, 10);
@@ -1648,18 +1745,22 @@ function updateDailyProfitStat() {
 
 // ==================== INIT ====================
 async function init(){
-  await loadAllData();
-  if(!getBooks().length){
-    const initialized=localStorage.getItem('library_initialized');
-    if(!initialized){
-      const samples=[{title:'ألف ليلة وليلة',author:'مجهول',category:'أدب كلاسيكي',buyPrice:15000,sellPrice:25000,quantity:8},{title:'مقدمة ابن خلدون',author:'ابن خلدون',category:'تاريخ',buyPrice:20000,sellPrice:35000,quantity:5},{title:'النبي',author:'جبران خليل جبران',category:'أدب',buyPrice:8000,sellPrice:15000,quantity:12},{title:'طوق الحمامة',author:'ابن حزم',category:'أدب كلاسيكي',buyPrice:12000,sellPrice:20000,quantity:3},{title:'رجال في الشمس',author:'غسان كنفاني',category:'روايات',buyPrice:10000,sellPrice:18000,quantity:7},{title:'البخلاء',author:'الجاحظ',category:'أدب كلاسيكي',buyPrice:14000,sellPrice:22000,quantity:6},{title:'الأيام',author:'طه حسين',category:'سيرة ذاتية',buyPrice:11000,sellPrice:19000,quantity:4},{title:'في الطريق',author:'نجيب محفوظ',category:'روايات',buyPrice:9000,sellPrice:16000,quantity:10},{title:'تعلم البرمجة',author:'أحمد المبرمج',category:'تقنية',buyPrice:25000,sellPrice:40000,quantity:2},{title:'أساسيات الفيزياء',author:'فريدريك بوش',category:'علوم',buyPrice:30000,sellPrice:45000,quantity:1}];
-      await saveBooks(samples.map(s=>({...s,id:generateId(),isbn:'',notes:'',customFields:{},dateAdded:new Date().toISOString(),totalSold:0})));
-      localStorage.setItem('library_initialized','yes');
-    }
-  }
-  if(!getSettings().storeName)await saveSettingsData({storeName:'',phone:'',address:'',logo:'📚',footer:'شكراً لزيارتكم!'});
+  // افتح الواجهة فوراً من البيانات المحلية
+  _books = JSON.parse(localStorage.getItem('library_books') || '[]');
+  _sales = JSON.parse(localStorage.getItem('library_sales') || '[]');
+  _fields = JSON.parse(localStorage.getItem('library_custom_fields') || '[]');
+  _settings = JSON.parse(localStorage.getItem('library_settings') || '{}');
+  _reservations = JSON.parse(localStorage.getItem('library_reservations') || '[]');
+  _expenses = JSON.parse(localStorage.getItem('library_expenses') || '[]');
+  _dataLoaded = true;
+
+  if(!getSettings().storeName) _settings = {storeName:'',phone:'',address:'',logo:'📚',footer:'شكراً لزيارتكم!'};
+
   updateCategoryFilter();renderBooks();renderCustomFieldsList();renderAddCustomFields();updateHeaderStats();
   updateDailyProfitStat();
+
+  // زامن مع Firebase في الخلفية
+  loadAllData();
   startAutoRefresh();
 }
 init();
