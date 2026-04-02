@@ -226,7 +226,21 @@ body.light-mode .nav{background:rgba(255,255,255,0.95)}
 .theme-toggle{background:var(--bg-card);border:1px solid var(--border);border-radius:20px;padding:6px 12px;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;transition:all 0.2s}
 .theme-toggle:hover{border-color:var(--accent)}
 
-/* ===== GLOBAL OVERFLOW FIX ===== */
+/* ===== BOOK CARDS - MOBILE ===== */
+.book-card{display:none}
+@media(max-width:768px){
+  .books-table-wrap{display:none}
+  .book-card{display:block;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:0.9rem;margin-bottom:0.6rem;transition:all 0.2s}
+  .book-card:active{background:var(--bg-card-hover)}
+  .book-card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.6rem}
+  .book-card-title{font-weight:700;font-size:0.95rem;flex:1;margin-left:0.5rem}
+  .book-card-stock{flex-shrink:0}
+  .book-card-row{display:flex;justify-content:space-between;font-size:0.82rem;color:var(--text-secondary);margin-bottom:0.35rem}
+  .book-card-row span:last-child{font-family:'Readex Pro',sans-serif;font-weight:600;color:var(--text-primary)}
+  .book-card-footer{display:flex;justify-content:space-between;align-items:center;margin-top:0.6rem;padding-top:0.6rem;border-top:1px solid var(--border)}
+  .book-card-category{font-size:0.75rem}
+  .book-card-actions{display:flex;gap:6px}
+}
 html, body {
   overflow-x: hidden;
   max-width: 100%;
@@ -412,7 +426,8 @@ html, body {
       <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()">📤 استيراد</button>
       <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
     </div>
-    <div class="table-container"><div class="table-scroll"><table><thead><tr id="booksTableHead"></tr></thead><tbody id="booksTableBody"></tbody></table></div><div class="pagination" id="booksPagination"></div></div>
+    <div class="table-container books-table-wrap"><div class="table-scroll"><table><thead><tr id="booksTableHead"></tr></thead><tbody id="booksTableBody"></tbody></table></div><div class="pagination" id="booksPagination"></div></div>
+    <div id="booksCardView" style="display:none"></div>
   </div>
 
   <!-- ============ ADD BOOK PAGE ============ -->
@@ -911,8 +926,46 @@ function renderBooks(){
   let hdr='<th>#</th><th>اسم الكتاب</th><th>المؤلف</th><th>القسم</th><th>سعر الشراء</th><th>سعر البيع</th><th>الربح</th><th>الكمية</th>';
   fields.forEach(f=>{hdr+=`<th>${f.name}</th>`});hdr+='<th>الإجراءات</th>';thead.innerHTML=hdr;
   const start=(currentBookPage-1)*ITEMS_PER_PAGE,pageBooks=books.slice(start,start+ITEMS_PER_PAGE),tc=9+fields.length;
-  if(!books.length){tbody.innerHTML=`<tr><td colspan="${tc}"><div class="empty-state"><div class="icon">📚</div><p>لا توجد كتب</p></div></td></tr>`;document.getElementById('booksPagination').innerHTML='';updateStats(allBooks);return}
-  tbody.innerHTML=pageBooks.map((b,i)=>{const profit=b.sellPrice-b.buyPrice,pc=profit>=0?'price-profit':'price-loss',sc=b.quantity===0?'stock-out':b.quantity<=3?'stock-low':'stock-ok',sl=b.quantity===0?'نفذ':b.quantity<=3?'قليل':'متوفر';let cc='';fields.forEach(f=>{const v=(b.customFields&&b.customFields[f.id])||'';cc+=`<td class="custom-val">${v!==''?(f.type==='number'?formatNum(v):v):'—'}</td>`});return`<tr><td style="color:var(--text-muted)">${start+i+1}</td><td class="book-title-cell">${b.title}</td><td class="book-author">${b.author||'—'}</td><td>${b.category?`<span class="category-tag">${b.category}</span>`:'—'}</td><td class="price price-buy">${formatNum(b.buyPrice)}</td><td class="price price-sell">${formatNum(b.sellPrice)}</td><td class="price ${pc}">${profit>=0?'+':''}${formatNum(profit)}</td><td><span class="stock-badge ${sc}">${sl} (${b.quantity})</span></td>${cc}<td><div class="actions-cell"><button class="btn btn-secondary btn-sm" onclick="openEditModal('${b.id}')">✏️</button><button class="btn btn-danger btn-sm" onclick="deleteBook('${b.id}')">🗑️</button></div></td></tr>`}).join('');
+  const isMobile=window.innerWidth<=768;
+  const cardView=document.getElementById('booksCardView');
+  const tableWrap=document.querySelector('.books-table-wrap');
+
+  if(!books.length){
+    tbody.innerHTML=`<tr><td colspan="${tc}"><div class="empty-state"><div class="icon">📚</div><p>لا توجد كتب</p></div></td></tr>`;
+    if(cardView)cardView.innerHTML='<div class="empty-state"><div class="icon">📚</div><p>لا توجد كتب</p></div>';
+    document.getElementById('booksPagination').innerHTML='';
+    updateStats(allBooks);return;
+  }
+
+  if(isMobile){
+    // عرض البطاقات على الموبايل
+    if(tableWrap)tableWrap.style.display='none';
+    if(cardView)cardView.style.display='block';
+    cardView.innerHTML=pageBooks.map((b,i)=>{
+      const profit=b.sellPrice-b.buyPrice,pc=profit>=0?'price-profit':'price-loss',sc=b.quantity===0?'stock-out':b.quantity<=3?'stock-low':'stock-ok',sl=b.quantity===0?'نفذ':b.quantity<=3?'قليل ('+b.quantity+')':'متوفر ('+b.quantity+')';
+      return`<div class="book-card">
+        <div class="book-card-top">
+          <div class="book-card-title">${b.title}</div>
+          <span class="stock-badge ${sc} book-card-stock">${sl}</span>
+        </div>
+        <div class="book-card-row"><span>المؤلف</span><span>${b.author||'—'}</span></div>
+        <div class="book-card-row"><span>سعر الشراء</span><span class="price-buy">${formatNum(b.buyPrice)} د.ع</span></div>
+        <div class="book-card-row"><span>سعر البيع</span><span class="price-sell">${formatNum(b.sellPrice)} د.ع</span></div>
+        <div class="book-card-row"><span>الربح</span><span class="${pc}">${profit>=0?'+':''}${formatNum(profit)} د.ع</span></div>
+        <div class="book-card-footer">
+          <span>${b.category?`<span class="category-tag book-card-category">${b.category}</span>`:'—'}</span>
+          <div class="book-card-actions">
+            <button class="btn btn-secondary btn-sm" onclick="openEditModal('${b.id}')">✏️ تعديل</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteBook('${b.id}')">🗑️</button>
+          </div>
+        </div>
+      </div>`}).join('');
+  } else {
+    // عرض الجدول على الديسكتوب
+    if(tableWrap)tableWrap.style.display='';
+    if(cardView)cardView.style.display='none';
+    tbody.innerHTML=pageBooks.map((b,i)=>{const profit=b.sellPrice-b.buyPrice,pc=profit>=0?'price-profit':'price-loss',sc=b.quantity===0?'stock-out':b.quantity<=3?'stock-low':'stock-ok',sl=b.quantity===0?'نفذ':b.quantity<=3?'قليل':'متوفر';let cc='';fields.forEach(f=>{const v=(b.customFields&&b.customFields[f.id])||'';cc+=`<td class="custom-val">${v!==''?(f.type==='number'?formatNum(v):v):'—'}</td>`});return`<tr><td style="color:var(--text-muted)">${start+i+1}</td><td class="book-title-cell">${b.title}</td><td class="book-author">${b.author||'—'}</td><td>${b.category?`<span class="category-tag">${b.category}</span>`:'—'}</td><td class="price price-buy">${formatNum(b.buyPrice)}</td><td class="price price-sell">${formatNum(b.sellPrice)}</td><td class="price ${pc}">${profit>=0?'+':''}${formatNum(profit)}</td><td><span class="stock-badge ${sc}">${sl} (${b.quantity})</span></td>${cc}<td><div class="actions-cell"><button class="btn btn-secondary btn-sm" onclick="openEditModal('${b.id}')">✏️</button><button class="btn btn-danger btn-sm" onclick="deleteBook('${b.id}')">🗑️</button></div></td></tr>`}).join('');
+  }
   renderPagination('booksPagination',currentBookPage,totalPages,p=>{currentBookPage=p;renderBooks()});updateStats(allBooks);
 }
 function getFilteredBooks(){let books=getBooks();const s=document.getElementById('searchInput').value.trim().toLowerCase(),cat=document.getElementById('categoryFilter').value,st=document.getElementById('stockFilter').value;if(s)books=books.filter(b=>b.title.toLowerCase().includes(s)||(b.author&&b.author.toLowerCase().includes(s))||(b.isbn&&b.isbn.includes(s)));if(cat)books=books.filter(b=>b.category===cat);if(st==='ok')books=books.filter(b=>b.quantity>3);if(st==='low')books=books.filter(b=>b.quantity>0&&b.quantity<=3);if(st==='out')books=books.filter(b=>b.quantity===0);return books}
@@ -1768,6 +1821,9 @@ function updateDailyProfitStat() {
   const el = document.getElementById('statDailyProfit');
   if (el) el.textContent = formatNum(dp);
 }
+
+// إعادة رسم الكتب عند تغيير حجم الشاشة
+window.addEventListener('resize', ()=>{ if(document.getElementById('page-books').classList.contains('active')) renderBooks(); });
 
 // ==================== INIT ====================
 async function init(){
