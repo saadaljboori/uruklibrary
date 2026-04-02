@@ -320,9 +320,6 @@ html, body {
   /* الإعدادات */
   .settings-section{padding:0.9rem}
 
-  /* العداد في الزاوية */
-  #refreshCountdown{bottom:12px;left:12px;padding:5px 10px;font-size:0.75rem}
-
   /* Empty state */
   .empty-state{padding:1.5rem}
   .empty-state .icon{font-size:1.8rem}
@@ -366,24 +363,24 @@ html, body {
 
 <div id="refreshCountdown" style="
   position:fixed;
-  top:18px;
-  left:50%;
-  transform:translateX(-50%);
+  bottom:16px;
+  right:16px;
   z-index:500;
   display:flex;
   align-items:center;
-  gap:4px;
-  background:var(--bg-input);
+  gap:3px;
+  background:var(--bg-card);
   border:1px solid var(--border);
   border-radius:20px;
-  padding:3px 10px;
-  font-size:0.72rem;
+  padding:3px 8px;
+  font-size:0.7rem;
   color:var(--text-muted);
   user-select:none;
+  opacity:0.7;
 " title="تحديث تلقائي">
-  <span style="font-size:0.72rem" id="refreshIcon">🔄</span>
-  <span style="font-family:'Readex Pro',sans-serif;font-weight:700;font-size:0.78rem;min-width:14px;text-align:center" id="countdownNum">15</span>
-  <span style="font-size:0.68rem">ث</span>
+  <span style="font-size:0.68rem" id="refreshIcon">🔄</span>
+  <span style="font-family:'Readex Pro',sans-serif;font-weight:700;font-size:0.75rem;min-width:12px;text-align:center" id="countdownNum">15</span>
+  <span style="font-size:0.65rem">ث</span>
 </div>
 
 <style>
