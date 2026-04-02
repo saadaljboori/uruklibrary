@@ -366,25 +366,24 @@ html, body {
 
 <div id="refreshCountdown" style="
   position:fixed;
-  bottom:20px;
-  left:20px;
+  top:18px;
+  left:50%;
+  transform:translateX(-50%);
   z-index:500;
   display:flex;
   align-items:center;
-  gap:8px;
-  background:var(--bg-card);
+  gap:4px;
+  background:var(--bg-input);
   border:1px solid var(--border);
-  border-radius:30px;
-  padding:8px 16px;
-  font-size:0.82rem;
+  border-radius:20px;
+  padding:3px 10px;
+  font-size:0.72rem;
   color:var(--text-muted);
-  box-shadow:0 4px 16px rgba(0,0,0,0.25);
-  backdrop-filter:blur(8px);
   user-select:none;
-" title="تحديث تلقائي للبيانات">
-  <span style="font-size:1rem;animation:spin 2s linear infinite;display:inline-block" id="refreshIcon">🔄</span>
-  <span style="font-family:'Readex Pro',sans-serif;font-weight:800;font-size:1.1rem;color:var(--accent);min-width:22px;text-align:center" id="countdownNum">15</span>
-  <span style="font-size:0.75rem">ث</span>
+" title="تحديث تلقائي">
+  <span style="font-size:0.72rem" id="refreshIcon">🔄</span>
+  <span style="font-family:'Readex Pro',sans-serif;font-weight:700;font-size:0.78rem;min-width:14px;text-align:center" id="countdownNum">15</span>
+  <span style="font-size:0.68rem">ث</span>
 </div>
 
 <style>
@@ -439,27 +438,90 @@ html, body {
     <div style="max-width:700px">
       <h2 style="font-family:'Readex Pro',sans-serif;font-size:1.3rem;margin-bottom:1.5rem">📝 إضافة كتاب جديد</h2>
       <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem">
+
         <div class="form-group"><label class="form-label">اسم الكتاب *</label><input type="text" class="form-input" id="addTitle" placeholder="أدخل اسم الكتاب" oninput="showSuggestions(this,'titleSuggestions','title')" autocomplete="off"><div id="titleSuggestions" class="suggestions-box"></div></div>
-        <div class="form-row"><div class="form-group"><label class="form-label">المؤلف</label><input type="text" class="form-input" id="addAuthor" placeholder="اسم المؤلف" oninput="showSuggestions(this,'authorSuggestions','author')" autocomplete="off"><div id="authorSuggestions" class="suggestions-box"></div></div><div class="form-group"><label class="form-label">القسم</label><input type="text" class="form-input" id="addCategory" placeholder="أدب، تاريخ، علوم" oninput="showSuggestions(this,'categorySuggestions','category')" autocomplete="off"><div id="categorySuggestions" class="suggestions-box"></div></div></div>
+
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">المؤلف</label><input type="text" class="form-input" id="addAuthor" placeholder="اسم المؤلف" oninput="showSuggestions(this,'authorSuggestions','author')" autocomplete="off"><div id="authorSuggestions" class="suggestions-box"></div></div>
+          <div class="form-group"><label class="form-label">القسم</label><input type="text" class="form-input" id="addCategory" placeholder="أدب، تاريخ، علوم" oninput="showSuggestions(this,'categorySuggestions','category')" autocomplete="off"><div id="categorySuggestions" class="suggestions-box"></div></div>
+        </div>
+
         <div class="form-group"><label class="form-label">دار النشر</label><input type="text" class="form-input" id="addPublisher" placeholder="اسم دار النشر" oninput="showSuggestions(this,'publisherSuggestions','publisher')" autocomplete="off"><div id="publisherSuggestions" class="suggestions-box"></div></div>
-        <div class="form-row"><div class="form-group"><label class="form-label">سعر الشراء *</label><input type="number" class="form-input" id="addBuyPrice" placeholder="0" min="0" step="250"></div><div class="form-group"><label class="form-label">سعر البيع *</label><input type="number" class="form-input" id="addSellPrice" placeholder="0" min="0" step="250"></div></div>
-        <div class="form-row"><div class="form-group"><label class="form-label">الكمية *</label><input type="number" class="form-input" id="addQuantity" placeholder="1" min="1" value="1"></div><div class="form-group"><label class="form-label">ISBN</label><input type="text" class="form-input" id="addISBN" placeholder="رقم ISBN"></div></div>
-        <div class="form-group"><label class="form-label">ملاحظات</label><input type="text" class="form-input" id="addNotes" placeholder="ملاحظات إضافية"></div>
-        <div id="addCustomFieldsContainer"></div>
-        <div style="margin-top:1.5rem;display:flex;gap:0.75rem"><button class="btn btn-primary" onclick="addBook()">➕ إضافة الكتاب</button><button class="btn btn-secondary" onclick="clearAddForm()">🔄 مسح</button></div>
-      </div>
-      <div class="fields-manager">
-        <div class="fields-manager-header"><div class="fields-manager-title">⚙️ إدارة الحقول المخصصة</div><span style="font-size:0.78rem;color:var(--text-muted)">أضف حقول إضافية</span></div>
-        <div class="fields-manager-body">
-          <div id="customFieldsList"></div>
-          <div class="add-field-form">
-            <div class="form-group" style="flex:2"><label class="form-label">اسم الحقل</label><input type="text" class="form-input" id="newFieldName" placeholder="مثال: عدد الصفحات"></div>
-            <div class="form-group"><label class="form-label">نوع الحقل</label><select class="form-input" id="newFieldType"><option value="text">نص</option><option value="number">رقم</option><option value="select">قائمة</option></select></div>
-            <div class="form-group" id="selectOptionsGroup" style="display:none;flex:2"><label class="form-label">الاختيارات (فاصلة)</label><input type="text" class="form-input" id="newFieldOptions" placeholder="جديد، مستعمل، نادر"></div>
-            <button class="btn btn-purple" onclick="addCustomField()" style="height:40px">➕ إضافة حقل</button>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">حجم الكتاب</label>
+            <div style="display:flex;gap:6px">
+              <select class="form-input" id="addSizePreset" onchange="applyBookSizePreset()" style="flex:1">
+                <option value="">اختر حجم...</option>
+                <option value="A5">A5</option>
+                <option value="A4">A4</option>
+                <option value="وزيري">وزيري</option>
+                <option value="بيروتي">بيروتي</option>
+                <option value="جيب">جيب</option>
+                <option value="custom">تخصيص</option>
+              </select>
+              <input type="text" class="form-input" id="addSize" placeholder="مثال: 17×24 سم" style="flex:1">
+            </div>
+          </div>
+          <div class="form-group"><label class="form-label">عدد الصفحات</label><input type="number" class="form-input" id="addPages" placeholder="0" min="0"></div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">عدد المجلدات</label><input type="number" class="form-input" id="addVolumes" placeholder="1" min="1" value="1"></div>
+          <div class="form-group">
+            <label class="form-label">الغلاف</label>
+            <div style="display:flex;gap:6px">
+              <select class="form-input" id="addCoverPreset" onchange="applyBookCoverPreset()" style="flex:1">
+                <option value="">اختر نوع...</option>
+                <option value="مجلد فاخر">مجلد فاخر</option>
+                <option value="مجلد عادي">مجلد عادي</option>
+                <option value="كرتوني">كرتوني</option>
+                <option value="ورقي">ورقي</option>
+                <option value="custom">تخصيص</option>
+              </select>
+              <input type="text" class="form-input" id="addCover" placeholder="نوع الغلاف" style="flex:1">
+            </div>
           </div>
         </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">الورق</label>
+            <div style="display:flex;gap:6px">
+              <select class="form-input" id="addPaperPreset" onchange="applyBookPaperPreset()" style="flex:1">
+                <option value="">اختر نوع...</option>
+                <option value="أبيض فاخر">أبيض فاخر</option>
+                <option value="أبيض عادي">أبيض عادي</option>
+                <option value="أصفر">أصفر</option>
+                <option value="شمواه">شمواه</option>
+                <option value="custom">تخصيص</option>
+              </select>
+              <input type="text" class="form-input" id="addPaper" placeholder="نوع الورق" style="flex:1">
+            </div>
+          </div>
+          <div class="form-group"><label class="form-label">سنة الطبع</label><input type="number" class="form-input" id="addYear" placeholder="2024" min="1900" max="2100"></div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">سعر الشراء *</label><input type="number" class="form-input" id="addBuyPrice" placeholder="0" min="0" step="250"></div>
+          <div class="form-group"><label class="form-label">سعر البيع *</label><input type="number" class="form-input" id="addSellPrice" placeholder="0" min="0" step="250"></div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">الكمية *</label><input type="number" class="form-input" id="addQuantity" placeholder="1" min="1" value="1"></div>
+          <div class="form-group"><label class="form-label">ISBN</label><input type="text" class="form-input" id="addISBN" placeholder="رقم ISBN"></div>
+        </div>
+
+        <div class="form-group"><label class="form-label">ملاحظات</label><input type="text" class="form-input" id="addNotes" placeholder="ملاحظات إضافية"></div>
+
+        <div style="margin-top:1.5rem;display:flex;gap:0.75rem">
+          <button class="btn btn-primary" onclick="addBook()">➕ إضافة الكتاب</button>
+          <button class="btn btn-secondary" onclick="clearAddForm()">🔄 مسح</button>
+        </div>
       </div>
+    </div>
+  </div>
     </div>
   </div>
 
@@ -626,12 +688,32 @@ html, body {
   <div class="modal-body">
     <input type="hidden" id="editId">
     <div class="form-group"><label class="form-label">اسم الكتاب</label><input type="text" class="form-input" id="editTitle"></div>
-    <div class="form-row"><div class="form-group"><label class="form-label">المؤلف</label><input type="text" class="form-input" id="editAuthor"></div><div class="form-group"><label class="form-label">القسم</label><input type="text" class="form-input" id="editCategory"></div></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">المؤلف</label><input type="text" class="form-input" id="editAuthor"></div>
+      <div class="form-group"><label class="form-label">القسم</label><input type="text" class="form-input" id="editCategory"></div>
+    </div>
     <div class="form-group"><label class="form-label">دار النشر</label><input type="text" class="form-input" id="editPublisher"></div>
-    <div class="form-row"><div class="form-group"><label class="form-label">سعر الشراء</label><input type="number" class="form-input" id="editBuyPrice" min="0" step="250"></div><div class="form-group"><label class="form-label">سعر البيع</label><input type="number" class="form-input" id="editSellPrice" min="0" step="250"></div></div>
-    <div class="form-row"><div class="form-group"><label class="form-label">الكمية</label><input type="number" class="form-input" id="editQuantity" min="0"></div><div class="form-group"><label class="form-label">ISBN</label><input type="text" class="form-input" id="editISBN"></div></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">حجم الكتاب</label><input type="text" class="form-input" id="editSize" placeholder="مثال: 17×24 سم"></div>
+      <div class="form-group"><label class="form-label">عدد الصفحات</label><input type="number" class="form-input" id="editPages" min="0"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">عدد المجلدات</label><input type="number" class="form-input" id="editVolumes" min="1"></div>
+      <div class="form-group"><label class="form-label">الغلاف</label><input type="text" class="form-input" id="editCover" placeholder="نوع الغلاف"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">الورق</label><input type="text" class="form-input" id="editPaper" placeholder="نوع الورق"></div>
+      <div class="form-group"><label class="form-label">سنة الطبع</label><input type="number" class="form-input" id="editYear" min="1900" max="2100"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">سعر الشراء</label><input type="number" class="form-input" id="editBuyPrice" min="0" step="250"></div>
+      <div class="form-group"><label class="form-label">سعر البيع</label><input type="number" class="form-input" id="editSellPrice" min="0" step="250"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">الكمية</label><input type="number" class="form-input" id="editQuantity" min="0"></div>
+      <div class="form-group"><label class="form-label">ISBN</label><input type="text" class="form-input" id="editISBN"></div>
+    </div>
     <div class="form-group"><label class="form-label">ملاحظات</label><input type="text" class="form-input" id="editNotes"></div>
-    <div id="editCustomFieldsContainer"></div>
   </div>
   <div class="modal-footer"><button class="btn btn-primary" onclick="saveEdit()">💾 حفظ</button><button class="btn btn-secondary" onclick="closeEditModal()">إلغاء</button></div>
 </div></div>
@@ -897,7 +979,7 @@ function showPage(page){
   document.getElementById(`page-${page}`).classList.add('active');
   document.querySelector(`.nav-btn[data-page="${page}"]`).classList.add('active');
   if(page==='books')renderBooks();
-  if(page==='add'){renderCustomFieldsList();renderAddCustomFields()}
+  if(page==='add'){}
   if(page==='sell')renderPosBooks();
   if(page==='reservations')renderReservations();
   if(page==='expenses')renderExpenses();
@@ -921,8 +1003,39 @@ function getCFV(prefix){const fields=getCustomFields(),v={};fields.forEach(f=>{c
 function setCFV(prefix,values){getCustomFields().forEach(f=>{const el=document.getElementById(`${prefix}_cf_${f.id}`);if(el&&values&&values[f.id]!==undefined)el.value=values[f.id]})}
 
 // ==================== BOOKS ====================
-function addBook(){const title=document.getElementById('addTitle').value.trim(),author=document.getElementById('addAuthor').value.trim(),category=document.getElementById('addCategory').value.trim(),publisher=document.getElementById('addPublisher').value.trim(),buyPrice=parseFloat(document.getElementById('addBuyPrice').value)||0,sellPrice=parseFloat(document.getElementById('addSellPrice').value)||0,quantity=parseInt(document.getElementById('addQuantity').value)||1,isbn=document.getElementById('addISBN').value.trim(),notes=document.getElementById('addNotes').value.trim(),cf=getCFV('add');if(!title){showToast('يرجى إدخال اسم الكتاب','error');return}if(!buyPrice&&!sellPrice){showToast('يرجى إدخال سعر','error');return}const books=getBooks();books.push({id:generateId(),title,author,category,publisher,buyPrice,sellPrice,quantity,isbn,notes,customFields:cf,dateAdded:new Date().toISOString(),totalSold:0});saveBooks(books);clearAddForm();showToast(`تمت إضافة "${title}"`);updateCategoryFilter();updateHeaderStats()}
-function clearAddForm(){['addTitle','addAuthor','addCategory','addPublisher','addBuyPrice','addSellPrice','addISBN','addNotes'].forEach(id=>document.getElementById(id).value='');document.getElementById('addQuantity').value='1';getCustomFields().forEach(f=>{const el=document.getElementById(`add_cf_${f.id}`);if(el)el.value=''})}
+function applyBookSizePreset(){const v=document.getElementById('addSizePreset').value;if(v&&v!=='custom')document.getElementById('addSize').value=v;}
+function applyBookCoverPreset(){const v=document.getElementById('addCoverPreset').value;if(v&&v!=='custom')document.getElementById('addCover').value=v;}
+function applyBookPaperPreset(){const v=document.getElementById('addPaperPreset').value;if(v&&v!=='custom')document.getElementById('addPaper').value=v;}
+
+function addBook(){
+  const title=document.getElementById('addTitle').value.trim(),
+        author=document.getElementById('addAuthor').value.trim(),
+        category=document.getElementById('addCategory').value.trim(),
+        publisher=document.getElementById('addPublisher').value.trim(),
+        size=document.getElementById('addSize').value.trim(),
+        pages=parseInt(document.getElementById('addPages').value)||0,
+        volumes=parseInt(document.getElementById('addVolumes').value)||1,
+        cover=document.getElementById('addCover').value.trim(),
+        paper=document.getElementById('addPaper').value.trim(),
+        year=document.getElementById('addYear').value.trim(),
+        buyPrice=parseFloat(document.getElementById('addBuyPrice').value)||0,
+        sellPrice=parseFloat(document.getElementById('addSellPrice').value)||0,
+        quantity=parseInt(document.getElementById('addQuantity').value)||1,
+        isbn=document.getElementById('addISBN').value.trim(),
+        notes=document.getElementById('addNotes').value.trim();
+  if(!title){showToast('يرجى إدخال اسم الكتاب','error');return}
+  if(!buyPrice&&!sellPrice){showToast('يرجى إدخال سعر','error');return}
+  const books=getBooks();
+  books.push({id:generateId(),title,author,category,publisher,size,pages,volumes,cover,paper,year,buyPrice,sellPrice,quantity,isbn,notes,customFields:{},dateAdded:new Date().toISOString(),totalSold:0});
+  saveBooks(books);clearAddForm();showToast(`تمت إضافة "${title}"`);updateCategoryFilter();updateHeaderStats();
+}
+
+function clearAddForm(){
+  ['addTitle','addAuthor','addCategory','addPublisher','addSize','addPages','addCover','addPaper','addYear','addBuyPrice','addSellPrice','addISBN','addNotes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});
+  document.getElementById('addQuantity').value='1';
+  document.getElementById('addVolumes').value='1';
+  ['addSizePreset','addCoverPreset','addPaperPreset'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+}
 
 function renderBooks(){
   const books=getFilteredBooks(),allBooks=getBooks(),fields=getCustomFields(),thead=document.getElementById('booksTableHead'),tbody=document.getElementById('booksTableBody');
@@ -981,9 +1094,46 @@ function updateHeaderStats(){const books=getBooks();document.getElementById('hea
 function updateCategoryFilter(){const cats=[...new Set(getBooks().map(b=>b.category).filter(Boolean))].sort(),sel=document.getElementById('categoryFilter'),cur=sel.value;sel.innerHTML='<option value="">كل الأقسام</option>'+cats.map(c=>`<option value="${c}">${c}</option>`).join('');if(cats.includes(cur))sel.value=cur;document.getElementById('categoryList').innerHTML=cats.map(c=>`<option value="${c}">`).join('')}
 
 // ==================== EDIT ====================
-function openEditModal(id){const book=getBooks().find(b=>b.id===id);if(!book)return;document.getElementById('editId').value=id;document.getElementById('editTitle').value=book.title;document.getElementById('editAuthor').value=book.author||'';document.getElementById('editCategory').value=book.category||'';document.getElementById('editPublisher').value=book.publisher||'';document.getElementById('editBuyPrice').value=book.buyPrice;document.getElementById('editSellPrice').value=book.sellPrice;document.getElementById('editQuantity').value=book.quantity;document.getElementById('editISBN').value=book.isbn||'';document.getElementById('editNotes').value=book.notes||'';const fields=getCustomFields(),c=document.getElementById('editCustomFieldsContainer');if(fields.length){let h='<div style="border-top:1px dashed var(--border-light);margin-top:1rem;padding-top:1rem"><div style="font-size:0.85rem;font-weight:600;color:var(--purple);margin-bottom:0.75rem">⚡ حقول مخصصة</div>';for(let i=0;i<fields.length;i+=2){const f1=fields[i],f2=fields[i+1];if(f2)h+=`<div class="form-row">${rfi(f1,'edit')}${rfi(f2,'edit')}</div>`;else h+=rfi(f1,'edit')}h+='</div>';c.innerHTML=h;setTimeout(()=>setCFV('edit',book.customFields||{}),10)}else c.innerHTML='';document.getElementById('editModal').classList.add('active')}
+function openEditModal(id){
+  const book=getBooks().find(b=>b.id===id);if(!book)return;
+  document.getElementById('editId').value=id;
+  document.getElementById('editTitle').value=book.title;
+  document.getElementById('editAuthor').value=book.author||'';
+  document.getElementById('editCategory').value=book.category||'';
+  document.getElementById('editPublisher').value=book.publisher||'';
+  document.getElementById('editSize').value=book.size||'';
+  document.getElementById('editPages').value=book.pages||'';
+  document.getElementById('editVolumes').value=book.volumes||1;
+  document.getElementById('editCover').value=book.cover||'';
+  document.getElementById('editPaper').value=book.paper||'';
+  document.getElementById('editYear').value=book.year||'';
+  document.getElementById('editBuyPrice').value=book.buyPrice;
+  document.getElementById('editSellPrice').value=book.sellPrice;
+  document.getElementById('editQuantity').value=book.quantity;
+  document.getElementById('editISBN').value=book.isbn||'';
+  document.getElementById('editNotes').value=book.notes||'';
+  document.getElementById('editModal').classList.add('active');
+}
 function closeEditModal(){document.getElementById('editModal').classList.remove('active')}
-function saveEdit(){const id=document.getElementById('editId').value,books=getBooks(),book=books.find(b=>b.id===id);if(!book)return;book.title=document.getElementById('editTitle').value.trim();book.author=document.getElementById('editAuthor').value.trim();book.category=document.getElementById('editCategory').value.trim();book.publisher=document.getElementById('editPublisher').value.trim();book.buyPrice=parseFloat(document.getElementById('editBuyPrice').value)||0;book.sellPrice=parseFloat(document.getElementById('editSellPrice').value)||0;book.quantity=parseInt(document.getElementById('editQuantity').value)||0;book.isbn=document.getElementById('editISBN').value.trim();book.notes=document.getElementById('editNotes').value.trim();book.customFields=getCFV('edit');saveBooks(books);closeEditModal();renderBooks();updateCategoryFilter();updateHeaderStats();showToast('تم التحديث')}
+function saveEdit(){
+  const id=document.getElementById('editId').value,books=getBooks(),book=books.find(b=>b.id===id);if(!book)return;
+  book.title=document.getElementById('editTitle').value.trim();
+  book.author=document.getElementById('editAuthor').value.trim();
+  book.category=document.getElementById('editCategory').value.trim();
+  book.publisher=document.getElementById('editPublisher').value.trim();
+  book.size=document.getElementById('editSize').value.trim();
+  book.pages=parseInt(document.getElementById('editPages').value)||0;
+  book.volumes=parseInt(document.getElementById('editVolumes').value)||1;
+  book.cover=document.getElementById('editCover').value.trim();
+  book.paper=document.getElementById('editPaper').value.trim();
+  book.year=document.getElementById('editYear').value.trim();
+  book.buyPrice=parseFloat(document.getElementById('editBuyPrice').value)||0;
+  book.sellPrice=parseFloat(document.getElementById('editSellPrice').value)||0;
+  book.quantity=parseInt(document.getElementById('editQuantity').value)||0;
+  book.isbn=document.getElementById('editISBN').value.trim();
+  book.notes=document.getElementById('editNotes').value.trim();
+  saveBooks(books);closeEditModal();renderBooks();updateCategoryFilter();updateHeaderStats();showToast('تم التحديث');
+}
 
 // ==================== POS & CART ====================
 function renderPosBooks(){
