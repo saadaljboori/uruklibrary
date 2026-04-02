@@ -59,7 +59,7 @@ body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:
 .nav-btn{background:none;border:none;color:var(--text-muted);font-family:'Tajawal',sans-serif;font-size:0.95rem;font-weight:500;padding:14px 20px;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;display:flex;align-items:center;gap:8px;white-space:nowrap}
 .nav-btn:hover{color:var(--text-secondary)}.nav-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
 
-.main{max-width:1400px;margin:0 auto;padding:1.5rem 2rem;position:relative;z-index:1}
+.main{max-width:1400px;margin:0 auto;padding:1.5rem 2rem;position:relative;z-index:1;overflow-x:hidden}
 .page{display:none;animation:fadeIn 0.3s ease}.page.active{display:block}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
@@ -226,76 +226,103 @@ body.light-mode .nav{background:rgba(255,255,255,0.95)}
 .theme-toggle{background:var(--bg-card);border:1px solid var(--border);border-radius:20px;padding:6px 12px;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;transition:all 0.2s}
 .theme-toggle:hover{border-color:var(--accent)}
 
+/* ===== GLOBAL OVERFLOW FIX ===== */
+html, body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+* { box-sizing: border-box; }
+
 @media(max-width:768px){
   .header{padding:0 0.75rem;height:56px}
   .header-stats{display:none}
   .logo-text{font-size:1rem}
   .logo-icon{width:34px;height:34px}
-  .nav{padding:0;top:56px;gap:0}
-  .nav-btn{padding:10px 12px;font-size:0.78rem;gap:4px}
-  .nav-btn .icon{font-size:0.9rem}
-  .main{padding:0.75rem}
-  .stats-grid{grid-template-columns:repeat(2,1fr);gap:0.5rem;margin-bottom:1rem}
-  .stat-card{padding:0.8rem}
-  .stat-card-value{font-size:1.3rem}
-  .stat-card-label{font-size:0.75rem}
-  .stat-card-icon{font-size:1.2rem;margin-bottom:0.3rem}
-  .toolbar{flex-direction:column;gap:0.5rem;margin-bottom:1rem}
-  .search-box{min-width:100%}
-  .search-box input{padding:10px 12px 10px 38px;font-size:0.85rem}
-  .filter-group{width:100%}
-  .filter-group select{flex:1;padding:8px 10px;font-size:0.82rem}
-  .btn{padding:8px 14px;font-size:0.82rem}
+  .nav{padding:0;top:56px;gap:0;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .nav::-webkit-scrollbar{display:none}
+  .nav-btn{padding:10px 10px;font-size:0.75rem;gap:3px;flex-shrink:0}
+  .nav-btn .icon{font-size:0.88rem}
+  .main{padding:0.6rem;overflow-x:hidden}
+  .stats-grid{grid-template-columns:repeat(2,1fr);gap:0.5rem;margin-bottom:0.75rem}
+  .stat-card{padding:0.75rem}
+  .stat-card-value{font-size:1.2rem}
+  .stat-card-label{font-size:0.72rem}
+  .stat-card-icon{font-size:1.1rem;margin-bottom:0.25rem}
+  .toolbar{flex-direction:column;gap:0.5rem;margin-bottom:0.75rem}
+  .search-box{min-width:100%;width:100%}
+  .search-box input{padding:10px 12px 10px 38px;font-size:0.85rem;width:100%}
+  .filter-group{width:100%;flex-wrap:wrap}
+  .filter-group select{flex:1;min-width:0;padding:8px 10px;font-size:0.82rem}
+  .btn{padding:8px 12px;font-size:0.8rem}
   .form-row{grid-template-columns:1fr}
-  .form-input{padding:8px 10px;font-size:0.88rem}
+  .form-input{padding:8px 10px;font-size:0.88rem;width:100%}
   .form-label{font-size:0.8rem}
   .reports-grid{grid-template-columns:1fr}
   .add-field-form{flex-direction:column}
-  .table-container{border-radius:8px}
-  table{min-width:600px}
-  thead th{padding:8px 10px;font-size:0.75rem}
-  tbody td{padding:8px 10px;font-size:0.8rem}
-  .actions-cell{gap:2px}
-  .btn-sm{padding:5px 8px;font-size:0.72rem}
-  /* POS mobile layout */
-  #page-sell > h2 ~ div{grid-template-columns:1fr!important;gap:1rem}
-  #page-expenses > .stats-grid ~ div{grid-template-columns:1fr!important;gap:1rem}
-  .cart-items{max-height:150px}
+
+  /* الجداول - تمرير أفقي داخل الجدول فقط */
+  .table-container{border-radius:8px;width:100%;overflow:hidden}
+  .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%}
+  table{min-width:500px;width:100%}
+  thead th{padding:7px 8px;font-size:0.72rem;white-space:nowrap}
+  tbody td{padding:7px 8px;font-size:0.78rem}
+  .actions-cell{gap:2px;flex-wrap:nowrap}
+  .btn-sm{padding:4px 7px;font-size:0.7rem}
+  .book-title-cell{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+  /* POS */
+  #page-sell > h2 ~ div{grid-template-columns:1fr!important;gap:0.75rem}
+  #page-expenses > .stats-grid ~ div{grid-template-columns:1fr!important;gap:0.75rem}
+  .cart-items{max-height:140px}
   .cart-item{padding:6px 8px}
-  .cart-item-name{font-size:0.8rem}
-  .cart-total{padding:10px;font-size:0.9rem}
-  /* Modal mobile */
-  .modal{max-width:100%;max-height:100vh;border-radius:8px;margin:0.5rem}
+  .cart-item-name{font-size:0.78rem}
+  .cart-total{padding:10px;font-size:0.88rem}
+
+  /* المودال */
+  .modal-overlay{padding:0.5rem;align-items:flex-end}
+  .modal{max-width:100%;width:100%;max-height:92vh;border-radius:12px 12px 0 0;margin:0}
   .modal.wide{max-width:100%}
-  .modal-header{padding:1rem}
-  .modal-body{padding:1rem}
+  .modal-header{padding:0.9rem 1rem}
+  .modal-body{padding:0.9rem;overflow-y:auto}
   .modal-footer{padding:0.75rem 1rem;flex-wrap:wrap;gap:0.5rem}
   .modal-footer .btn{flex:1;min-width:calc(50% - 0.5rem);justify-content:center;font-size:0.8rem;padding:8px 10px}
-  /* Invoice mobile */
-  .inv-header{flex-direction:column;gap:12px;padding:16px}
-  .inv-meta{flex-direction:column;gap:8px;padding:12px 16px}
+
+  /* الفاتورة */
+  .inv-header{flex-direction:column;gap:12px;padding:14px}
+  .inv-meta{flex-direction:column;gap:6px;padding:10px 14px}
   .inv-meta-item{display:flex;justify-content:space-between;text-align:right}
-  .inv-body{padding:12px 16px}
-  .inv-table th{padding:6px 8px;font-size:0.72rem}
-  .inv-table td{padding:6px 8px;font-size:0.78rem}
+  .inv-body{padding:10px 14px}
+  .inv-table th{padding:5px 7px;font-size:0.7rem}
+  .inv-table td{padding:5px 7px;font-size:0.76rem}
   .inv-totals-box{min-width:100%;width:100%}
-  .inv-footer{padding:12px 16px;font-size:0.75rem}
-  .inv-store-name{font-size:1.2rem}
-  .inv-logo{width:55px;height:55px}
-  /* Settings mobile */
-  .settings-section{padding:1rem}
+  .inv-footer{padding:10px 14px;font-size:0.73rem}
+  .inv-store-name{font-size:1.1rem}
+  .inv-logo{width:50px;height:50px}
+
+  /* الإعدادات */
+  .settings-section{padding:0.9rem}
+
+  /* العداد في الزاوية */
+  #refreshCountdown{bottom:12px;left:12px;padding:5px 10px;font-size:0.75rem}
+
   /* Empty state */
-  .empty-state{padding:2rem}
-  .empty-state .icon{font-size:2rem}
-  .empty-state p{font-size:0.85rem}
-  /* Page title */
-  h2{font-size:1.1rem!important}
+  .empty-state{padding:1.5rem}
+  .empty-state .icon{font-size:1.8rem}
+  .empty-state p{font-size:0.82rem}
+  h2{font-size:1.05rem!important}
+
+  /* حقول مخصصة */
+  .fields-manager{margin-top:1rem}
+  .custom-field-item{padding:8px 10px}
 }
 
 @media(max-width:400px){
-  .nav-btn{padding:8px 8px;font-size:0.7rem}
-  .stat-card-value{font-size:1.1rem}
-  .stats-grid{gap:0.4rem}
+  .nav-btn{padding:8px 7px;font-size:0.68rem}
+  .stat-card-value{font-size:1rem}
+  .stats-grid{gap:0.35rem;grid-template-columns:repeat(2,1fr)}
+  .main{padding:0.5rem}
+  .btn{padding:7px 10px;font-size:0.76rem}
+  table{min-width:420px}
 }
 
 @media print{
