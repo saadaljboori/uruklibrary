@@ -226,20 +226,24 @@ body.light-mode .nav{background:rgba(255,255,255,0.95)}
 .theme-toggle{background:var(--bg-card);border:1px solid var(--border);border-radius:20px;padding:6px 12px;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;transition:all 0.2s}
 .theme-toggle:hover{border-color:var(--accent)}
 
-/* ===== BOOK CARDS - MOBILE ===== */
+/* ===== BOOK CARDS - MOBILE ACCORDION ===== */
 .book-card{display:none}
 @media(max-width:768px){
   .books-table-wrap{display:none}
-  .book-card{display:block;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:0.9rem;margin-bottom:0.6rem;transition:all 0.2s}
-  .book-card:active{background:var(--bg-card-hover)}
-  .book-card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.6rem}
-  .book-card-title{font-weight:700;font-size:0.95rem;flex:1;margin-left:0.5rem}
-  .book-card-stock{flex-shrink:0}
-  .book-card-row{display:flex;justify-content:space-between;font-size:0.82rem;color:var(--text-secondary);margin-bottom:0.35rem}
-  .book-card-row span:last-child{font-family:'Readex Pro',sans-serif;font-weight:600;color:var(--text-primary)}
-  .book-card-footer{display:flex;justify-content:space-between;align-items:center;margin-top:0.6rem;padding-top:0.6rem;border-top:1px solid var(--border)}
-  .book-card-category{font-size:0.75rem}
-  .book-card-actions{display:flex;gap:6px}
+  .book-card{display:block;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:0.5rem;overflow:hidden;transition:all 0.2s}
+  .book-card-header{display:flex;justify-content:space-between;align-items:center;padding:0.85rem 1rem;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
+  .book-card-header:active{background:var(--bg-card-hover)}
+  .book-card-name{font-weight:700;font-size:0.92rem;flex:1}
+  .book-card-arrow{font-size:0.75rem;color:var(--text-muted);transition:transform 0.25s;flex-shrink:0;margin-right:8px}
+  .book-card.open .book-card-arrow{transform:rotate(180deg)}
+  .book-card-details{display:none;padding:0 1rem 0.9rem;border-top:1px solid var(--border)}
+  .book-card.open .book-card-details{display:block}
+  .book-card-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:0.84rem}
+  .book-card-row:last-of-type{border-bottom:none}
+  .book-card-row-label{color:var(--text-muted)}
+  .book-card-row-val{font-family:'Readex Pro',sans-serif;font-weight:600}
+  .book-card-actions{display:flex;gap:8px;margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid var(--border)}
+  .book-card-actions .btn{flex:1;justify-content:center}
 }
 html, body {
   overflow-x: hidden;
@@ -943,20 +947,21 @@ function renderBooks(){
     if(cardView)cardView.style.display='block';
     cardView.innerHTML=pageBooks.map((b,i)=>{
       const profit=b.sellPrice-b.buyPrice,pc=profit>=0?'price-profit':'price-loss',sc=b.quantity===0?'stock-out':b.quantity<=3?'stock-low':'stock-ok',sl=b.quantity===0?'نفذ':b.quantity<=3?'قليل ('+b.quantity+')':'متوفر ('+b.quantity+')';
-      return`<div class="book-card">
-        <div class="book-card-top">
-          <div class="book-card-title">${b.title}</div>
-          <span class="stock-badge ${sc} book-card-stock">${sl}</span>
+      return`<div class="book-card" id="bcard_${b.id}">
+        <div class="book-card-header" onclick="toggleBookCard('${b.id}')">
+          <div class="book-card-name">${b.title}</div>
+          <span class="stock-badge ${sc}" style="font-size:0.7rem;padding:2px 8px;margin-left:8px">${sl}</span>
+          <span class="book-card-arrow">▼</span>
         </div>
-        <div class="book-card-row"><span>المؤلف</span><span>${b.author||'—'}</span></div>
-        <div class="book-card-row"><span>سعر الشراء</span><span class="price-buy">${formatNum(b.buyPrice)} د.ع</span></div>
-        <div class="book-card-row"><span>سعر البيع</span><span class="price-sell">${formatNum(b.sellPrice)} د.ع</span></div>
-        <div class="book-card-row"><span>الربح</span><span class="${pc}">${profit>=0?'+':''}${formatNum(profit)} د.ع</span></div>
-        <div class="book-card-footer">
-          <span>${b.category?`<span class="category-tag book-card-category">${b.category}</span>`:'—'}</span>
+        <div class="book-card-details">
+          ${b.author?`<div class="book-card-row"><span class="book-card-row-label">المؤلف</span><span class="book-card-row-val">${b.author}</span></div>`:''}
+          ${b.category?`<div class="book-card-row"><span class="book-card-row-label">القسم</span><span class="book-card-row-val"><span class="category-tag" style="font-size:0.75rem">${b.category}</span></span></div>`:''}
+          <div class="book-card-row"><span class="book-card-row-label">سعر الشراء</span><span class="book-card-row-val price-buy">${formatNum(b.buyPrice)} د.ع</span></div>
+          <div class="book-card-row"><span class="book-card-row-label">سعر البيع</span><span class="book-card-row-val price-sell">${formatNum(b.sellPrice)} د.ع</span></div>
+          <div class="book-card-row"><span class="book-card-row-label">الربح</span><span class="book-card-row-val ${pc}">${profit>=0?'+':''}${formatNum(profit)} د.ع</span></div>
           <div class="book-card-actions">
             <button class="btn btn-secondary btn-sm" onclick="openEditModal('${b.id}')">✏️ تعديل</button>
-            <button class="btn btn-danger btn-sm" onclick="deleteBook('${b.id}')">🗑️</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteBook('${b.id}')">🗑️ حذف</button>
           </div>
         </div>
       </div>`}).join('');
@@ -1820,6 +1825,12 @@ function updateDailyProfitStat() {
   const dp = getDailyProfit();
   const el = document.getElementById('statDailyProfit');
   if (el) el.textContent = formatNum(dp);
+}
+
+function toggleBookCard(id) {
+  const card = document.getElementById('bcard_' + id);
+  if (!card) return;
+  card.classList.toggle('open');
 }
 
 // إعادة رسم الكتب عند تغيير حجم الشاشة
